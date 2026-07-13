@@ -8,7 +8,7 @@ class SharedNav extends HTMLElement {
       <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50">
         <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2 font-display">
-            <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-40 h-40 object-contain -my-14 -mx-10">
+            <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png" alt="Social Sync Logo" class="w-40 h-40 object-contain -my-14 -mx-10">
             Social Sync
           </a>
           
@@ -109,7 +109,7 @@ class SharedFooter extends HTMLElement {
             <!-- Brand Info Column -->
             <div class="md:col-span-4 space-y-4">
               <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5 font-display">
-                <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-14 h-14 object-contain">
+                <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png" alt="Social Sync Logo" class="w-14 h-14 object-contain">
                 Social Sync
               </a>
               <p class="text-slate-500 leading-relaxed font-medium max-w-sm text-xs sm:text-sm">
