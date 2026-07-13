@@ -208,7 +208,7 @@
           const scriptOrigin = apiHost.replace('social-api.codeways.co', 'socialsync-7f6.pages.dev'); // Fallback structure
           const resolvedScriptHost = apiHost;
           
-          this.embedCode = `<div id="codeways-social-feed"></div>\n<script src="${resolvedScriptHost}/embed.js" data-client="${this.clientSlug}" data-platform="${this.embedPlatform}" defer><\/script>`;
+          this.embedCode = `<div id="codeways-social-feed">\n  <!-- Social Sync Feed -->\n</div>\n<script src="${resolvedScriptHost}/embed.js" data-client="${this.clientSlug}" data-platform="${this.embedPlatform}" defer><\/script>`;
         },
 
         copyEmbedCode() {
