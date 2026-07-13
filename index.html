@@ -199,6 +199,12 @@
             name: 'Agency Growth',
             price: '$29',
             link: 'https://buy.stripe.com/test_agency_link'
+          },
+          addon: {
+            id: 'addon',
+            name: 'Extra Site Slot',
+            price: '$3',
+            link: 'https://buy.stripe.com/test_addon_link'
           }
         },
 
@@ -621,7 +627,7 @@
       </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       
       <!-- Starter -->
       <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:border-[#00A3E0]/30 transition duration-300 shadow-sm hover:shadow-2xl hover:scale-[1.01] transform">
@@ -718,10 +724,6 @@
               <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               <span>Hourly Refresh Rate</span>
             </li>
-            <li class="flex items-center gap-3">
-              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              <span>Priority Developer Support</span>
-            </li>
           </ul>
         </div>
         <div class="space-y-3">
@@ -729,6 +731,38 @@
             Subscribe Agency
           </button>
           <span class="block text-[10px] text-center text-slate-400 font-semibold">Instant activation • Cancel anytime</span>
+        </div>
+      </div>
+
+      <!-- Pay As You Grow (Add-on Slot) -->
+      <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:border-[#00A3E0]/30 transition duration-300 shadow-sm hover:shadow-2xl hover:scale-[1.01] transform">
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4 font-display">Pay As You Grow</span>
+          <div class="flex items-baseline gap-1 mb-6">
+            <span class="text-5xl font-extrabold text-slate-900 font-display">$3</span>
+            <span class="text-sm text-slate-400 font-semibold">/ month</span>
+          </div>
+          <p class="text-slate-550 text-xs mb-6 font-medium">Add individual website slots to scale your existing setup.</p>
+          <ul class="space-y-4 text-sm text-slate-600 mb-8 border-t border-slate-100 pt-6">
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Add +1 Whitelisted Domain</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Add +1 Connected Profile</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Matches parent plan features</span>
+            </li>
+          </ul>
+        </div>
+        <div class="space-y-3">
+          <button @click="redirectToCheckout('addon')" class="w-full bg-slate-900 hover:bg-[#00A3E0] hover:shadow-lg hover:shadow-[#00A3E0]/15 text-white font-bold py-3.5 px-6 rounded-xl transition duration-300">
+            Add Extra Slot
+          </button>
+          <span class="block text-[10px] text-center text-slate-400 font-semibold">Buy as many slots as you need</span>
         </div>
       </div>
 
