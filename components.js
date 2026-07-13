@@ -18,17 +18,17 @@ class SharedNav extends HTMLElement {
             <a href="/#compare" class="hover:text-slate-900 transition-colors">Performance</a>
             <a href="/#pricing" class="hover:text-slate-900 transition-colors">Pricing & Plans</a>
             <a href="/#faq" class="hover:text-slate-900 transition-colors">FAQ</a>
-            ${isAuth 
-              ? `<a href="/dashboard.html" class="hover:text-slate-900 transition-colors font-bold text-[#00A3E0]">Dashboard</a>` 
-              : `<a href="/dashboard-login.html" class="hover:text-slate-900 transition-colors font-bold text-[#00A3E0]">Login</a>`
-            }
+            <a href="/blog" class="hover:text-slate-900 transition-colors">Blog</a>
           </nav>
 
           <!-- CTA -->
-          <div class="hidden md:flex items-center gap-4">
+          <div class="hidden md:flex items-center gap-3">
             ${isAuth
-              ? `<a href="/dashboard.html" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-semibold px-5 py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-500/10">Dashboard</a>`
-              : `<a href="/#pricing" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-semibold px-5 py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-500/10">Get Started</a>`
+              ? `<a href="/dashboard.html" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-semibold px-5 py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-500/10 font-display">Dashboard</a>`
+              : `
+                <a href="/dashboard-login.html" class="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-sm font-display">Login</a>
+                <a href="/#pricing" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-semibold px-5 py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-500/10 font-display">Get Started</a>
+              `
             }
           </div>
 
@@ -72,21 +72,24 @@ class SharedNav extends HTMLElement {
                   FAQ
                   <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </a>
-                ${isAuth 
-                  ? `<a href="/dashboard.html" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between font-bold">
-                       Dashboard
-                       <svg class="w-5 h-5 text-[#00A3E0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                     </a>` 
-                  : `<a href="/dashboard-login.html" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between font-bold">
-                       Login
-                       <svg class="w-5 h-5 text-[#00A3E0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                     </a>`
-                }
+                <a href="/blog" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between font-bold">
+                  Blog
+                  <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
               </nav>
             </div>
-            <div class="p-6 border-t border-slate-100 bg-slate-50">
-              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Support</h3>
-              <p class="text-sm text-slate-600">support@codeways.co</p>
+            <div class="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
+              ${isAuth
+                ? `<a href="/dashboard.html" onclick="toggleMobileMenu(false)" class="block text-center bg-gradient-to-r from-[#00A3E0] to-indigo-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-indigo-500/10 font-display">Dashboard</a>`
+                : `
+                  <a href="/dashboard-login.html" onclick="toggleMobileMenu(false)" class="block text-center border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl text-sm transition shadow-sm font-display">Login</a>
+                  <a href="/#pricing" onclick="toggleMobileMenu(false)" class="block text-center bg-gradient-to-r from-[#00A3E0] to-indigo-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-indigo-500/10 font-display">Get Started</a>
+                `
+              }
+              <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-400 font-medium">
+                <span>Support</span>
+                <span class="text-slate-600 font-semibold">support@codeways.co</span>
+              </div>
             </div>
           </div>
         </div>
@@ -106,7 +109,7 @@ class SharedFooter extends HTMLElement {
             <!-- Brand Info Column -->
             <div class="md:col-span-4 space-y-4">
               <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5 font-display">
-                <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-8 h-8 object-contain">
+                <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-14 h-14 object-contain">
                 Social Sync
               </a>
               <p class="text-slate-500 leading-relaxed font-medium max-w-sm text-xs sm:text-sm">

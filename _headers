@@ -9,3 +9,8 @@
   Link: </index.css>; rel=preload; as=style
   Link: <https://fonts.googleapis.com>; rel=preconnect
   Link: <https://fonts.gstatic.com>; rel=preconnect; crossorigin
+
+# ---- Blog Overview ----
+/blog
+  Link: </index.css>; rel=preload; as=style
+

@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "codeways-socialsync",
+  "pages_build_output_dir": ".",
+  "compatibility_date": "2026-06-11",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "codeways-socialhub-db",
+      "database_id": "172a9f93-7b3d-49d0-86a9-e3d010691392"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
