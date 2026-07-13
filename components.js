@@ -2,11 +2,13 @@
 
 class SharedNav extends HTMLElement {
   connectedCallback() {
+    const isAuth = !!localStorage.getItem('socialsync_session_token');
+
     this.innerHTML = `
       <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50">
         <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2 font-display">
-            <span class="w-8 h-8 rounded bg-gradient-to-tr from-[#00A3E0] to-indigo-500 flex items-center justify-center text-sm font-semibold text-white">S</span>
+          <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5 font-display">
+            <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-8 h-8 object-contain">
             Social Sync
           </a>
           
@@ -16,14 +18,18 @@ class SharedNav extends HTMLElement {
             <a href="/#compare" class="hover:text-slate-900 transition-colors">Performance</a>
             <a href="/#pricing" class="hover:text-slate-900 transition-colors">Pricing & Plans</a>
             <a href="/#faq" class="hover:text-slate-900 transition-colors">FAQ</a>
-            <a href="/dashboard.html" class="hover:text-slate-900 transition-colors font-semibold text-[#00A3E0]">Dashboard</a>
+            ${isAuth 
+              ? `<a href="/dashboard.html" class="hover:text-slate-900 transition-colors font-bold text-[#00A3E0]">Dashboard</a>` 
+              : `<a href="/dashboard-login.html" class="hover:text-slate-900 transition-colors font-bold text-[#00A3E0]">Login</a>`
+            }
           </nav>
 
           <!-- CTA -->
           <div class="hidden md:flex items-center gap-4">
-            <a href="/#pricing" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-semibold px-5 py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-500/10">
-              Get Started
-            </a>
+            ${isAuth
+              ? `<a href="/dashboard.html" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-semibold px-5 py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-500/10">Dashboard</a>`
+              : `<a href="/#pricing" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-semibold px-5 py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-500/10">Get Started</a>`
+            }
           </div>
 
           <!-- Mobile Menu Toggle -->
@@ -66,10 +72,16 @@ class SharedNav extends HTMLElement {
                   FAQ
                   <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </a>
-                <a href="/dashboard.html" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between font-semibold">
-                  Dashboard
-                  <svg class="w-5 h-5 text-[#00A3E0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </a>
+                ${isAuth 
+                  ? `<a href="/dashboard.html" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between font-bold">
+                       Dashboard
+                       <svg class="w-5 h-5 text-[#00A3E0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                     </a>` 
+                  : `<a href="/dashboard-login.html" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between font-bold">
+                       Login
+                       <svg class="w-5 h-5 text-[#00A3E0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                     </a>`
+                }
               </nav>
             </div>
             <div class="p-6 border-t border-slate-100 bg-slate-50">
@@ -93,8 +105,8 @@ class SharedFooter extends HTMLElement {
             
             <!-- Brand Info Column -->
             <div class="md:col-span-4 space-y-4">
-              <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2 font-display">
-                <span class="w-8 h-8 rounded bg-gradient-to-tr from-[#00A3E0] to-indigo-500 flex items-center justify-center text-sm font-semibold text-white">S</span>
+              <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5 font-display">
+                <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-8 h-8 object-contain">
                 Social Sync
               </a>
               <p class="text-slate-500 leading-relaxed font-medium max-w-sm text-xs sm:text-sm">
