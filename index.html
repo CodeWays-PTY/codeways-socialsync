@@ -156,7 +156,6 @@
     document.addEventListener('alpine:init', () => {
       Alpine.data('marketingPage', () => ({
         activeFaq: null,
-        compareOffset: 50,
         plans: {
           starter: {
             id: 'starter',
@@ -191,8 +190,8 @@
 </head>
 <body x-data="marketingPage()" class="bg-[#f8fafc] text-[#1e293b] min-h-screen selection:bg-[#00A3E0] selection:text-white font-sans overflow-x-hidden">
 
-  <!-- Component Navigation Placeholder -->
-  <div id="shared-nav"></div>
+  <!-- Component Navigation -->
+  <shared-nav></shared-nav>
 
   <!-- Hero Section -->
   <section class="relative min-h-[90vh] flex items-center justify-center px-6 grid-bg border-b border-slate-200/60 py-16">
@@ -304,7 +303,7 @@
         </div>
       </div>
 
-      <!-- Right side: Persuasive Proof Points (The "How we do it" Sales Pitch) -->
+      <!-- Right side: Persuasive Proof Points -->
       <div class="lg:col-span-5 space-y-6">
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
           <h3 class="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
@@ -337,7 +336,7 @@
     </div>
   </section>
 
-  <!-- The SEO & Performance Blueprint (Explaining How We Do It - Persuasive Sales Pitch) -->
+  <!-- The SEO & Performance Blueprint -->
   <section class="py-24 max-w-[1200px] mx-auto px-6 border-b border-slate-200/60 bg-white">
     <div class="text-center space-y-4 mb-20">
       <span class="text-xs font-semibold text-[#00A3E0] uppercase tracking-widest block">How We Achieve Visibility</span>
@@ -349,7 +348,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       
-      <!-- Bluepoint 1 -->
+      <!-- Blueprint 1 -->
       <div class="border border-slate-100 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-lg transition duration-300">
         <span class="text-3xl font-extrabold text-[#00A3E0] block mb-6">01</span>
         <h3 class="text-xl font-bold text-slate-900 mb-3">Pre-Rendered Edge Delivery</h3>
@@ -358,7 +357,7 @@
         </p>
       </div>
 
-      <!-- Bluepoint 2 -->
+      <!-- Blueprint 2 -->
       <div class="border border-slate-100 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-lg transition duration-300">
         <span class="text-3xl font-extrabold text-[#00A3E0] block mb-6">02</span>
         <h3 class="text-xl font-bold text-slate-900 mb-3">Structured Schema Integration</h3>
@@ -367,7 +366,7 @@
         </p>
       </div>
 
-      <!-- Bluepoint 3 -->
+      <!-- Blueprint 3 -->
       <div class="border border-slate-100 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-lg transition duration-300">
         <span class="text-3xl font-extrabold text-[#00A3E0] block mb-6">03</span>
         <h3 class="text-xl font-bold text-slate-900 mb-3">Zero Cumulative Layout Shift (CLS)</h3>
@@ -379,102 +378,97 @@
     </div>
   </section>
 
-  <!-- Interactive Speed Comparator -->
+  <!-- See the Difference Yourself (Redesigned Side-by-Side Comparison) -->
   <section id="compare" class="py-24 max-w-[1200px] mx-auto px-6 border-b border-slate-200/60 bg-slate-50/30">
     <div class="text-center space-y-4 mb-16">
-      <h2 class="text-3xl md:text-5xl font-bold font-display text-slate-900">See the Difference Yourself</h2>
+      <h2 class="text-3xl md:text-5xl font-bold font-display text-slate-900 font-extrabold">See the Difference Yourself</h2>
       <p class="text-slate-500 max-w-xl mx-auto text-base">
-        Drag the slider below to compare standard third-party plugins (which load heavy javascript packages) against Social Sync’s clean edge-cached architecture.
+        A direct performance evaluation comparing standard bloated widget scripts against Social Sync's clean edge-cached system.
       </p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       
-      <!-- Comparison Stats -->
-      <div class="space-y-8">
-        <div class="bg-slate-100/50 border border-slate-200 rounded-2xl p-6 relative overflow-hidden shadow-sm">
-          <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-            Traditional Widgets (Elfsight/EmbedSocial)
-          </h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Lighthouse Score</span>
-              <span class="text-2xl font-bold text-rose-500 font-display">42 / 100</span>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Payload Weight</span>
-              <span class="text-2xl font-bold text-rose-500 font-display">4.2 MB</span>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Request Count</span>
-              <span class="text-2xl font-bold text-rose-500 font-display">84 requests</span>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Blocking FCP</span>
-              <span class="text-2xl font-bold text-rose-500 font-display">3.4 seconds</span>
+      <!-- Legacy Bloat Card -->
+      <div class="bg-white border border-rose-200 rounded-3xl p-8 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">The Bloated Legacy Way</div>
+        
+        <div class="space-y-6">
+          <div class="flex items-center gap-3">
+            <span class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-xl text-rose-500">⚠</span>
+            <div>
+              <h3 class="font-bold text-slate-800">Standard Social Plugins</h3>
+              <p class="text-xs text-rose-500 font-semibold font-mono">Mobile Score: 42/100 (Failed)</p>
             </div>
           </div>
-        </div>
+          
+          <div class="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div>
+              <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">Payload Weight</span>
+              <span class="text-xl font-extrabold text-rose-600 font-display">4.2 MB</span>
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">HTTP Requests</span>
+              <span class="text-xl font-extrabold text-rose-600 font-display">84 external</span>
+            </div>
+          </div>
 
-        <div class="bg-gradient-to-r from-cyan-50/50 to-indigo-50/50 border border-cyan-500/20 rounded-2xl p-6 relative overflow-hidden shadow-sm">
-          <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-xl"></div>
-          <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Social Sync
-          </h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Lighthouse Score</span>
-              <span class="text-2xl font-bold text-emerald-600 font-display">100 / 100</span>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Payload Weight</span>
-              <span class="text-2xl font-bold text-emerald-600 font-display">2.1 KB</span>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Request Count</span>
-              <span class="text-2xl font-bold text-emerald-600 font-display">1 request</span>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-              <span class="block text-xs text-slate-400 font-semibold uppercase">Blocking FCP</span>
-              <span class="text-2xl font-bold text-emerald-600 font-display">0.05 seconds</span>
-            </div>
-          </div>
+          <ul class="space-y-3 text-sm text-slate-500">
+            <li class="flex items-start gap-2.5">
+              <span class="text-rose-500 font-bold font-mono">✗</span>
+              <span><strong>Blocks Browser Main Thread:</strong> Halts user scrolls and UI interactivity for 3.4 seconds while parsing heavy JS.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-rose-500 font-bold font-mono">✗</span>
+              <span><strong>Drops Tracking Cookies:</strong> Clutters user storage and violates strict privacy standards.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-rose-500 font-bold font-mono">✗</span>
+              <span><strong>Harms SEO Ranking:</strong> Google detects high latency and pushes your site down in US search results.</span>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <!-- Interactive Speed Slider -->
-      <div class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 shadow-xl bg-slate-50 flex flex-col justify-center">
-        <!-- Typical bloated layout -->
-        <div class="absolute inset-0 bg-slate-100 p-8 flex flex-col justify-center space-y-4">
-          <div class="text-xs text-rose-600 font-semibold font-mono uppercase bg-rose-100 px-2 py-0.5 rounded w-fit">Standard Widget Load Penalty</div>
-          <div class="h-4 bg-slate-200 rounded w-3/4"></div>
-          <div class="h-4 bg-slate-200 rounded w-5/6"></div>
-          <div class="grid grid-cols-3 gap-2 pt-4">
-            <div class="aspect-square bg-slate-200 rounded-lg flex items-center justify-center text-xs text-slate-400">Loading Bundle...</div>
-            <div class="aspect-square bg-slate-200 rounded-lg flex items-center justify-center text-xs text-slate-400">Blocked FCP</div>
-            <div class="aspect-square bg-slate-200 rounded-lg flex items-center justify-center text-xs text-slate-400">Loading Font...</div>
+      <!-- Social Sync Card -->
+      <div class="bg-white border-2 border-emerald-500 rounded-3xl p-8 shadow-md relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider animate-pulse">The Social Sync Way</div>
+        
+        <div class="space-y-6">
+          <div class="flex items-center gap-3">
+            <span class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-xl text-emerald-500 font-bold">✓</span>
+            <div>
+              <h3 class="font-bold text-slate-800">Social Sync Edge</h3>
+              <p class="text-xs text-emerald-600 font-semibold font-mono">Mobile Score: 100/100 (Perfect)</p>
+            </div>
           </div>
-          <div class="text-xs text-rose-600 leading-normal">Blocking threads for 3200ms... Site feels unresponsive.</div>
-        </div>
-
-        <!-- Social Sync Clean Layout -->
-        <div class="absolute inset-0 bg-white p-8 flex flex-col justify-center space-y-4 transition-all duration-300"
-             :style="'clip-path: polygon(0 0, ' + compareOffset + '% 0, ' + compareOffset + '% 100%, 0 100%)'">
-          <div class="text-xs text-[#00A3E0] font-semibold font-mono uppercase bg-[#00A3E0]/10 px-2 py-0.5 rounded w-fit">Social Sync Edge</div>
-          <div class="h-4 bg-slate-100 rounded w-3/4"></div>
-          <div class="h-4 bg-slate-100 rounded w-5/6"></div>
-          <div class="grid grid-cols-3 gap-2 pt-4">
-            <div class="aspect-square bg-gradient-to-tr from-[#00A3E0]/10 to-indigo-500/5 rounded-lg border border-[#00A3E0]/20 flex items-center justify-center text-xs font-semibold text-[#00A3E0]">Edge Live</div>
-            <div class="aspect-square bg-gradient-to-tr from-[#00A3E0]/10 to-indigo-500/5 rounded-lg border border-[#00A3E0]/20 flex items-center justify-center text-xs font-semibold text-[#00A3E0]">No Bloat</div>
-            <div class="aspect-square bg-gradient-to-tr from-[#00A3E0]/10 to-indigo-500/5 rounded-lg border border-[#00A3E0]/20 flex items-center justify-center text-xs font-semibold text-[#00A3E0]">100% Score</div>
+          
+          <div class="grid grid-cols-2 gap-3 bg-emerald-50/30 p-4 rounded-2xl border border-emerald-100">
+            <div>
+              <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">Payload Weight</span>
+              <span class="text-xl font-extrabold text-emerald-600 font-display">2.1 KB</span>
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">HTTP Requests</span>
+              <span class="text-xl font-extrabold text-emerald-600 font-display">1 request</span>
+            </div>
           </div>
-          <div class="text-xs text-emerald-600 leading-normal">Loaded instantly. DOM ready under 50ms.</div>
-        </div>
 
-        <!-- Range slider control overlay -->
-        <input type="range" min="0" max="100" x-model="compareOffset" class="absolute inset-x-0 bottom-6 opacity-90 cursor-pointer h-2 bg-slate-200 rounded-lg appearance-none accent-[#00A3E0] mx-8">
+          <ul class="space-y-3 text-sm text-slate-600">
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-500 font-bold font-mono">✓</span>
+              <span><strong>0ms Blocking Time:</strong> Instantly loads and displays feed grids under 50ms.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-500 font-bold font-mono">✓</span>
+              <span><strong>Zero Tracking Cookies:</strong> Fully respects user privacy and complies with modern regulations.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-500 font-bold font-mono">✓</span>
+              <span><strong>Boosts Google SEO:</strong> Fast page loads keep visitors on site, boosting search rankings in the US.</span>
+            </li>
+          </ul>
+        </div>
       </div>
 
     </div>
@@ -538,7 +532,7 @@
             </li>
             <li class="flex items-center gap-2.5">
               <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Up to 3 Connected Social Profiles
+              Access to LinkedIn Feed
             </li>
             <li class="flex items-center gap-2.5">
               <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -578,7 +572,7 @@
             </li>
             <li class="flex items-center gap-2.5">
               <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              White-labeled Client Onboarding Portal
+              Priority Developer Support
             </li>
           </ul>
         </div>
@@ -643,8 +637,8 @@
     </div>
   </section>
 
-  <!-- Component Footer Placeholder -->
-  <div id="shared-footer"></div>
+  <!-- Component Footer -->
+  <shared-footer></shared-footer>
 
 </body>
 </html>
