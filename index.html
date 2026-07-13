@@ -69,26 +69,50 @@
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "How does Social Sync maintain 100/100 PageSpeed scores?",
+            "name": "How does a slow Instagram widget impact my website's Google PageSpeed score?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Instead of injecting heavy third-party JavaScript files and bloated rendering engines, we store your social feeds as raw JSON payloads directly at global network edge caches. Your browser downloads only a tiny unstyled data grid payload (under 3KB), keeping FCP under 50ms."
+              "text": "Standard social media widgets load heavy third-party scripts and cookies that block the browser's main rendering thread. This increases Cumulative Layout Shift (CLS) and First Contentful Paint (FCP), causing a direct drop in PageSpeed scores and organic Google search rankings."
             }
           },
           {
             "@type": "Question",
-            "name": "Do Meta and LinkedIn access tokens expire?",
+            "name": "Why does Social Sync load feeds faster than other social media plugins?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes, OAuth tokens natively expire after 60 days. However, our system runs automated weekly cron scripts in the background that silently exchange and refresh your tokens. As long as your subscription is active, you will never have to re-auth again."
+              "text": "Instead of parsing heavy runtime scripts on every page load, Social Sync pre-caches compressed social feeds as lightweight, edge-native JSON files (under 3KB) on global edge servers. Feeds load in under 50ms with zero CPU blocking time."
             }
           },
           {
             "@type": "Question",
-            "name": "What is the Domain-Origin Lock?",
+            "name": "Can I display both Instagram and LinkedIn feeds using a single license?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "It is a security filter running at the network edge. When the embed script requests your feed, our edge server checks the request headers. If the request doesn't originate from your whitelisted domains, access is blocked, preventing other sites from using your license."
+              "text": "Yes! Our Pro Developer and Agency Growth plans allow you to integrate multiple active social media streams, including Instagram and LinkedIn, to display on your whitelisted web domains with no speed penalty."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does the Domain-Origin Lock secure my social feed script?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The Domain-Origin Lock checks the HTTP origin headers at the edge network. If a request for your social feed is initiated from a domain not explicitly whitelisted in your console, the connection is instantly rejected, preventing license leeching."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I have to manually refresh my Meta and LinkedIn API tokens?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Meta and LinkedIn access tokens expire after 60 days, but Social Sync runs an automated weekly background cron job that refreshes client access keys. Feeds remain synced indefinitely without manual re-authorization."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Social Sync GDPR and privacy law compliant?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Social Sync does not drop tracking cookies, collect personal identifier data from your site visitors, or run external tracking code. Feeds are served as static layout assets, ensuring full GDPR, CCPA, and POPIA compliance."
             }
           }
         ]
@@ -101,6 +125,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/index.css">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -194,84 +219,116 @@
   <shared-nav></shared-nav>
 
   <!-- Hero Section -->
-  <section class="relative min-h-[90vh] flex items-center justify-center px-6 grid-bg border-b border-slate-200/60 py-16">
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#f8fafc]/40 to-[#f8fafc] pointer-events-none"></div>
-    <div class="max-w-[1200px] w-full mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+  <section class="relative min-h-[95vh] flex items-center justify-center px-6 grid-bg border-b border-slate-200/60 py-20 overflow-hidden">
+    <!-- Glowing background elements for visual excellence -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#00A3E0]/15 to-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#f8fafc]/30 to-[#f8fafc] pointer-events-none"></div>
+    
+    <div class="max-w-[1200px] w-full mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
       
-      <!-- Hero Left: Strong Hook and Persuasive Copy -->
-      <div class="lg:col-span-7 space-y-6 text-left">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00A3E0]/10 border border-[#00A3E0]/20 text-xs font-semibold text-[#00A3E0] uppercase tracking-wider">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#00A3E0] animate-pulse"></span>
+      <!-- Hero Left -->
+      <div class="lg:col-span-7 space-y-8 text-left">
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#00A3E0]/8 border border-[#00A3E0]/20 text-xs font-semibold text-[#00A3E0] uppercase tracking-wider">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A3E0] opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00A3E0]"></span>
+          </span>
           Ultra-Low Latency US Edge Network
         </div>
         
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 font-display leading-[1.15]">
-          Turn Your Instagram & LinkedIn Feeds into <span class="bg-gradient-to-r from-[#00A3E0] to-indigo-600 bg-clip-text text-transparent">SEO-Boosted Sales Engines.</span>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 font-display leading-[1.12]">
+          Turn Your Social Feeds into <span class="bg-gradient-to-r from-[#00A3E0] via-indigo-500 to-indigo-700 bg-clip-text text-transparent">SEO-Boosted Sales Engines.</span>
         </h1>
         
-        <p class="text-slate-600 text-lg md:text-xl leading-relaxed font-medium">
-          Slow pages kill conversions. Standard social plugins block website rendering, drop massive tracking scripts, and destroy your search ranking. Social Sync delivers pre-cached feeds in under 50ms, keeping your site fast and Google happy.
+        <p class="text-slate-600 text-lg md:text-xl leading-relaxed font-medium max-w-2xl">
+          Standard social plugins block browser rendering, drop heavy tracking cookies, and tank your ranking. Social Sync embeds Instagram and LinkedIn feeds in under 50ms with <span class="text-slate-900 font-bold">0ms PageSpeed load penalty</span>.
         </p>
 
-        <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
-          <a href="#pricing" class="w-full sm:w-auto bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-95 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all transform hover:-translate-y-0.5 text-center">
+        <div class="flex flex-col sm:flex-row items-center gap-4 pt-2">
+          <a href="#pricing" class="w-full sm:w-auto bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:shadow-xl hover:shadow-indigo-500/20 text-white font-bold px-8 py-4 rounded-xl transition duration-300 transform hover:-translate-y-0.5 text-center shadow-lg">
             Start Setup in 2 Minutes
           </a>
-          <a href="#why-us" class="w-full sm:w-auto bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold px-8 py-4 rounded-xl transition text-center shadow-sm">
+          <a href="#why-us" class="w-full sm:w-auto bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold px-8 py-4 rounded-xl transition duration-300 text-center shadow-sm hover:shadow">
             Read The Sales Pitch
           </a>
         </div>
+        
+        <!-- Social proofs or trust micro-copy -->
+        <div class="flex items-center gap-6 pt-4 border-t border-slate-200/50">
+          <div class="flex -space-x-2">
+            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80" alt="User 1" width="32" height="32" />
+            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80" alt="User 2" width="32" height="32" />
+            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=80&h=80&q=80" alt="User 3" width="32" height="32" />
+          </div>
+          <p class="text-xs text-slate-500 font-medium">
+            Trusted by <span class="text-slate-800 font-bold">140+ high-growth brands</span> & agencies.
+          </p>
+        </div>
       </div>
 
-      <!-- Hero Right: High-Performance Widget Live Mockup -->
+      <!-- Hero Right -->
       <div class="lg:col-span-5 relative">
-        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl relative overflow-hidden max-w-sm mx-auto">
+        <!-- Interactive Widget Glassmorphic Container -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl relative overflow-hidden max-w-sm mx-auto transition-transform duration-500 hover:scale-[1.01]">
           <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
           
           <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
             <div class="flex items-center gap-2.5">
-              <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#00A3E0] to-indigo-500 flex items-center justify-center text-xs font-bold text-white">S</span>
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#00A3E0] to-indigo-500 flex items-center justify-center text-xs font-bold text-white shadow-sm font-display">S</div>
               <div>
-                <h4 class="text-xs font-bold text-slate-900 font-display">Social Sync Feed</h4>
-                <p class="text-[10px] text-slate-400 font-medium">Synced 5m ago</p>
+                <h4 class="text-xs font-extrabold text-slate-900 font-display">Voir Visuals</h4>
+                <p class="text-[10px] text-slate-400 font-semibold">Synced 5m ago</p>
               </div>
             </div>
-            <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold text-[10px] uppercase px-2 py-0.5 rounded-full tracking-wider animate-pulse">
+            <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-extrabold text-[10px] uppercase px-2.5 py-0.5 rounded-full tracking-wider animate-pulse font-sans">
               100/100 PageSpeed
             </div>
           </div>
 
+          <!-- Beautiful Premium Mock Post Grid -->
           <div class="grid grid-cols-2 gap-3">
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative group border border-slate-100">
-              <div class="absolute top-2 right-2 bg-black/60 text-white font-bold text-[9px] px-1 rounded">IG</div>
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div class="aspect-square rounded-xl overflow-hidden relative group border border-slate-150 transition duration-300 hover:shadow-md">
+              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250&h=250&q=80" alt="Mock Instagram" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" width="200" height="200" />
+              <div class="absolute top-2 right-2 bg-black/60 text-white font-bold text-[9px] px-1.5 py-0.5 rounded backdrop-blur-sm">IG</div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-2.5">
+                <p class="text-[9px] text-white line-clamp-2">Exploring minimalist interior architecture details.</p>
+              </div>
             </div>
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative group border border-slate-100">
-              <div class="absolute top-2 right-2 bg-[#0077b5] text-white font-bold text-[9px] px-1 rounded">LN</div>
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div class="aspect-square rounded-xl overflow-hidden relative group border border-slate-150 transition duration-300 hover:shadow-md">
+              <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=250&h=250&q=80" alt="Mock LinkedIn" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" width="200" height="200" />
+              <div class="absolute top-2 right-2 bg-[#0077b5] text-white font-bold text-[9px] px-1.5 py-0.5 rounded backdrop-blur-sm">LN</div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-2.5">
+                <p class="text-[9px] text-white line-clamp-2">Excited to share our branding strategy workflow!</p>
+              </div>
             </div>
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative group border border-slate-100">
-              <div class="absolute top-2 right-2 bg-[#0077b5] text-white font-bold text-[9px] px-1 rounded">LN</div>
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div class="aspect-square rounded-xl overflow-hidden relative group border border-slate-150 transition duration-300 hover:shadow-md">
+              <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=250&h=250&q=80" alt="Mock LinkedIn" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" width="200" height="200" />
+              <div class="absolute top-2 right-2 bg-[#0077b5] text-white font-bold text-[9px] px-1.5 py-0.5 rounded backdrop-blur-sm">LN</div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-2.5">
+                <p class="text-[9px] text-white line-clamp-2">Inside the design studio. Creative spaces breed creativity.</p>
+              </div>
             </div>
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative group border border-slate-100">
-              <div class="absolute top-2 right-2 bg-black/60 text-white font-bold text-[9px] px-1 rounded">IG</div>
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div class="aspect-square rounded-xl overflow-hidden relative group border border-slate-150 transition duration-300 hover:shadow-md">
+              <img src="https://images.unsplash.com/photo-1512756290489-ec064d11fcde?auto=format&fit=crop&w=250&h=250&q=80" alt="Mock Instagram" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" width="200" height="200" />
+              <div class="absolute top-2 right-2 bg-black/60 text-white font-bold text-[9px] px-1.5 py-0.5 rounded backdrop-blur-sm">IG</div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-2.5">
+                <p class="text-[9px] text-white line-clamp-2">Clean geometry and dynamic shadows on brand poster series.</p>
+              </div>
             </div>
           </div>
 
-          <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-wider">
             <span>Powered by CodeWays</span>
-            <span class="text-[#00A3E0] hover:underline">Get Widget &rarr;</span>
+            <span class="text-[#00A3E0] hover:underline cursor-pointer">Preview Feed &rarr;</span>
           </div>
         </div>
 
         <!-- Latency indicator badge -->
-        <div class="absolute -bottom-4 -right-4 bg-white border border-slate-200 rounded-2xl p-3 shadow-lg flex items-center gap-2.5">
-          <div class="w-3 h-3 rounded-full bg-emerald-500 flex items-center justify-center font-bold text-white text-[7px]">✓</div>
+        <div class="absolute -bottom-2 -right-4 bg-white border border-slate-200 rounded-2xl p-4 shadow-xl flex items-center gap-3 transition-transform duration-300 hover:translate-y-[-2px]">
+          <div class="w-5 h-5 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center font-extrabold text-[10px]">✓</div>
           <div>
-            <p class="text-[10px] font-bold text-slate-900">US Latency</p>
-            <p class="text-xs font-extrabold text-emerald-600">12ms</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Edge Latency</p>
+            <p class="text-sm font-black text-slate-800">12ms <span class="text-xs text-emerald-600 font-extrabold">(Optimal)</span></p>
           </div>
         </div>
       </div>
@@ -281,51 +338,69 @@
 
   <!-- The Hard Pitch: The Salesman Speaks -->
   <section id="why-us" class="py-24 max-w-[1200px] mx-auto px-6 border-b border-slate-200/60">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
       
-      <!-- Left side: The Pitch -->
-      <div class="lg:col-span-7 space-y-6">
-        <span class="text-xs font-semibold text-[#00A3E0] uppercase tracking-widest block">The Reality Check</span>
-        <h2 class="text-3xl md:text-5xl font-bold font-display text-slate-900 leading-tight font-extrabold">
+      <!-- Left side: Redesigned Readability Layout -->
+      <div class="lg:col-span-7 space-y-8">
+        <span class="text-xs font-bold text-[#00A3E0] uppercase tracking-widest block font-display">The Reality Check</span>
+        
+        <h2 class="text-3xl md:text-5xl font-extrabold font-display text-slate-950 leading-tight">
           Your current social widget is actively cost-penalizing your sales.
         </h2>
         
-        <div class="text-slate-600 space-y-4 text-base md:text-lg leading-relaxed">
+        <!-- Big impact warning callout block -->
+        <div class="bg-amber-500/5 border-l-4 border-amber-500 p-6 rounded-r-2xl space-y-2">
+          <span class="text-xs font-extrabold text-amber-600 uppercase tracking-widest block font-sans">The Core Issue</span>
+          <p class="text-slate-800 font-semibold text-lg leading-snug">
+            That standard social script you pasted just loaded 80+ external requests, dropped multiple tracking cookies, blocked your main thread, and tanked your PageSpeed score.
+          </p>
+        </div>
+
+        <div class="text-slate-600 space-y-6 text-base md:text-lg leading-relaxed font-medium">
           <p>
-            Think about it. You've spent thousands of dollars optimizing your copy, refining your branding, and buying traffic. Then, you decide to embed your social feed. You copy a script tag from a generic plugin provider, paste it on your site, and cross your fingers.
-          </p>
-          <p class="border-l-4 border-[#00A3E0] pl-4 font-medium text-slate-800 bg-slate-50 py-2 rounded-r-xl">
-            Here's what just happened: That plugin just loaded 80+ external requests, dropped multiple tracking cookies, blocked your main thread, and tanked your PageSpeed score. Google sees a slow site, pushes you down in search results, and 40% of your mobile traffic bounces.
+            Think about it. You've spent thousands of dollars optimizing your copy, refining your branding, and buying traffic. Then, you decide to embed a social feed, paste a script tag from a generic provider, and cross your fingers.
           </p>
           <p>
-            <strong>We built Social Sync because you shouldn’t have to compromise speed for social proof.</strong> Instead of forcing your visitors to download heavy scripts, we cache your feed directly at the edge of the network. It loads in a fraction of a millisecond—no tracking bloat, no broken FCP, and 100/100 performance scores.
+            When Google sees a slow site, it pushes your organic ranking down in search results. Studies show that <span class="text-rose-600 font-extrabold underline">up to 40% of mobile traffic bounces</span> if your page takes longer than 3 seconds to become interactive. Bloated plugins are directly burning your advertising budget.
           </p>
+          
+          <div class="pt-4">
+            <p class="text-slate-900 font-extrabold text-xl font-display mb-2">
+              We built Social Sync to eliminate this compromise.
+            </p>
+            <p>
+              Instead of forcing visitors to download heavy third-party rendering engines at runtime, we compress and cache your feed directly at the edge of the network. It loads in a fraction of a millisecond—no tracking bloat, no Cumulative Layout Shift, and a guaranteed 100/100 Core Web Vitals rating.
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- Right side: Persuasive Proof Points -->
-      <div class="lg:col-span-5 space-y-6">
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-          <h3 class="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
-            <span class="text-[#00A3E0]">⚡</span> Direct-Feed Acceleration
+      <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300 hover:border-[#00A3E0]/30">
+          <div class="w-10 h-10 rounded-xl bg-[#00A3E0]/10 flex items-center justify-center text-xl text-[#00A3E0] mb-4">⚡</div>
+          <h3 class="font-extrabold text-slate-900 text-lg mb-2 font-display">
+            Direct-Feed Acceleration
           </h3>
           <p class="text-sm text-slate-500 leading-relaxed font-medium">
-            How do we get FCP under 50ms? We bypass external databases and scripts. Your feed is pre-built, compressed, and delivered from a hyper-fast server positioned right next to your visitor's device. No loading lag, ever.
+            How do we get FCP under 50ms? We bypass external databases. Your feed is pre-built, compressed, and delivered from a hyper-fast server positioned right next to your visitor's device. No loading lag, ever.
           </p>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-          <h3 class="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
-            <span class="text-[#00A3E0]">🛡️</span> Domain Lock Cryptography
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300 hover:border-[#00A3E0]/30">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-xl text-indigo-500 mb-4">🛡️</div>
+          <h3 class="font-extrabold text-slate-900 text-lg mb-2 font-display">
+            Domain Lock Cryptography
           </h3>
           <p class="text-sm text-slate-500 leading-relaxed font-medium">
             How do we keep it secure? We digitally lock the feed parameters to your specific web domains. This guarantees other sites cannot hijack your license or leech your loading speeds.
           </p>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-          <h3 class="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
-            <span class="text-[#00A3E0]">🔄</span> Background Sync Autopilot
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-300 hover:border-[#00A3E0]/30">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-xl text-emerald-500 mb-4">🔄</div>
+          <h3 class="font-extrabold text-slate-900 text-lg mb-2 font-display">
+            Background Sync Autopilot
           </h3>
           <p class="text-sm text-slate-500 leading-relaxed font-medium">
             How do we ensure it never breaks? Our platform automatically updates and refreshes platform access tokens in the background every week. You configure it once, and it runs indefinitely.
@@ -339,9 +414,8 @@
   <!-- The SEO & Performance Blueprint -->
   <section class="py-24 max-w-[1200px] mx-auto px-6 border-b border-slate-200/60 bg-white">
     <div class="text-center space-y-4 mb-20">
-      <span class="text-xs font-semibold text-[#00A3E0] uppercase tracking-widest block">How We Achieve Visibility</span>
-      <h2 class="text-3xl md:text-5xl font-bold font-display text-slate-900 font-extrabold">The SEO & Speed Blueprint</h2>
-      <p class="text-slate-500 max-w-xl mx-auto text-base">
+      <h2 class="text-3xl md:text-5xl font-extrabold font-display text-slate-950">The SEO & Speed Blueprint</h2>
+      <p class="text-slate-550 max-w-xl mx-auto text-base font-medium">
         While other plugins slow down your visitor's page layout, we leverage pre-packaged feed systems to protect your Google rank. Here is how we turn speed into your biggest asset:
       </p>
     </div>
@@ -349,27 +423,27 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       
       <!-- Blueprint 1 -->
-      <div class="border border-slate-100 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-lg transition duration-300">
-        <span class="text-3xl font-extrabold text-[#00A3E0] block mb-6">01</span>
-        <h3 class="text-xl font-bold text-slate-900 mb-3">Pre-Rendered Edge Delivery</h3>
+      <div class="border border-slate-200/80 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-2xl hover:border-cyan-500/25 transition duration-300 transform hover:-translate-y-1">
+        <div class="w-12 h-12 bg-cyan-150 text-cyan-600 font-black font-display text-lg flex items-center justify-center rounded-2xl mb-6 shadow-sm">01</div>
+        <h3 class="text-xl font-extrabold text-slate-900 mb-3 font-display">Pre-Rendered Edge Delivery</h3>
         <p class="text-sm text-slate-500 leading-relaxed font-medium">
           Instead of compiling feeds inside the visitor's browser at runtime (which triggers layout shifting and browser delay), we render feeds on our servers and load them instantly from the nearest regional network node. Your visitors see your feed in the blink of an eye.
         </p>
       </div>
 
       <!-- Blueprint 2 -->
-      <div class="border border-slate-100 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-lg transition duration-300">
-        <span class="text-3xl font-extrabold text-[#00A3E0] block mb-6">02</span>
-        <h3 class="text-xl font-bold text-slate-900 mb-3">Structured Schema Integration</h3>
+      <div class="border border-slate-200/80 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-2xl hover:border-cyan-500/25 transition duration-300 transform hover:-translate-y-1">
+        <div class="w-12 h-12 bg-cyan-150 text-cyan-600 font-black font-display text-lg flex items-center justify-center rounded-2xl mb-6 shadow-sm">02</div>
+        <h3 class="text-xl font-extrabold text-slate-900 mb-3 font-display">Structured Schema Integration</h3>
         <p class="text-sm text-slate-500 leading-relaxed font-medium">
           Search engine crawlers and AI search platforms can't read raw image grids. We inject semantic structured graphs (JSON-LD Product and FAQ schemas) directly into your site layout, telling Google and AI engines exactly what your feed represents, enabling rich search snippet listings.
         </p>
       </div>
 
       <!-- Blueprint 3 -->
-      <div class="border border-slate-100 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-lg transition duration-300">
-        <span class="text-3xl font-extrabold text-[#00A3E0] block mb-6">03</span>
-        <h3 class="text-xl font-bold text-slate-900 mb-3">Zero Cumulative Layout Shift (CLS)</h3>
+      <div class="border border-slate-200/80 rounded-3xl p-8 bg-slate-50/50 hover:bg-white hover:shadow-2xl hover:border-cyan-500/25 transition duration-300 transform hover:-translate-y-1">
+        <div class="w-12 h-12 bg-cyan-150 text-cyan-600 font-black font-display text-lg flex items-center justify-center rounded-2xl mb-6 shadow-sm">03</div>
+        <h3 class="text-xl font-extrabold text-slate-900 mb-3 font-display">Zero Cumulative Layout Shift (CLS)</h3>
         <p class="text-sm text-slate-500 leading-relaxed font-medium">
           Google heavily penalizes pages when layout containers jump after loading. Our edge loaders reserve exact dimensions before displaying images. This guarantees a perfect 100/100 Core Web Vitals score, improving your ranking in US searches.
         </p>
@@ -477,159 +551,211 @@
   <!-- Pricing -->
   <section id="pricing" class="py-24 max-w-[1200px] mx-auto px-6 border-b border-slate-200/60">
     <div class="text-center space-y-4 mb-20">
-      <h2 class="text-3xl md:text-5xl font-bold font-display text-slate-900 font-extrabold">Simple, Transparent Pricing</h2>
-      <p class="text-slate-500 max-w-xl mx-auto text-base">
-        No hidden costs, no resource abuse safeguards. Choose the size that fits your client or agency.
+      <h2 class="text-3xl md:text-5xl font-extrabold font-display text-slate-950">Simple, Transparent Pricing</h2>
+      <p class="text-slate-550 max-w-xl mx-auto text-base font-medium">
+        Choose the perfect license tier for your website, development projects, or agency growth. All plans include automated token refresh updates.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       
       <!-- Starter -->
-      <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:border-[#00A3E0]/20 transition duration-300 shadow-sm hover:shadow-md">
+      <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:border-[#00A3E0]/30 transition duration-300 shadow-sm hover:shadow-2xl hover:scale-[1.01] transform">
         <div>
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-4 font-display">Starter License</span>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4 font-display">Starter License</span>
           <div class="flex items-baseline gap-1 mb-6">
-            <span class="text-4xl font-extrabold text-slate-900 font-display">$3</span>
-            <span class="text-sm text-slate-400">/ month</span>
+            <span class="text-5xl font-extrabold text-slate-900 font-display">$3</span>
+            <span class="text-sm text-slate-400 font-semibold">/ month</span>
           </div>
-          <ul class="space-y-4 text-sm text-slate-500 mb-8">
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              1 Whitelisted Domain
+          <p class="text-slate-500 text-xs mb-6 font-medium">Perfect for personal portfolios and simple blog setups.</p>
+          <ul class="space-y-4 text-sm text-slate-600 mb-8 border-t border-slate-100 pt-6">
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>1 Whitelisted Domain</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              1 Social Profile Connection
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>1 Social Connection (Instagram)</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              24-Hour Cache Refresh Frequency
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>24-Hour Cache Refresh</span>
             </li>
-            <li class="flex items-center gap-2.5 text-slate-300 line-through">
-              LinkedIn Feed Support
+            <li class="flex items-center gap-3 text-slate-350 line-through">
+              <svg class="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              <span>LinkedIn Feed Support</span>
             </li>
           </ul>
         </div>
-        <button @click="redirectToCheckout('starter')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-xl transition duration-150">
-          Subscribe Starter
-        </button>
+        <div class="space-y-3">
+          <button @click="redirectToCheckout('starter')" class="w-full bg-slate-900 hover:bg-[#00A3E0] hover:shadow-lg hover:shadow-[#00A3E0]/15 text-white font-bold py-3.5 px-6 rounded-xl transition duration-300">
+            Subscribe Starter
+          </button>
+          <span class="block text-[10px] text-center text-slate-400 font-semibold">Instant activation • Cancel anytime</span>
+        </div>
       </div>
 
       <!-- Pro -->
-      <div class="bg-white border-2 border-[#00A3E0] rounded-3xl p-8 flex flex-col justify-between relative shadow-lg shadow-[#00A3E0]/5">
-        <span class="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-[#00A3E0] to-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Most Popular</span>
+      <div class="bg-white border-2 border-[#00A3E0] rounded-3xl p-8 flex flex-col justify-between relative shadow-xl shadow-[#00A3E0]/5 hover:shadow-2xl hover:scale-[1.02] transform transition duration-300">
+        <span class="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-[#00A3E0] to-indigo-500 text-white text-[10px] font-extrabold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-md">Most Popular</span>
         <div>
-          <span class="text-xs font-semibold text-[#00A3E0] uppercase tracking-widest block mb-4 font-display">Pro Developer</span>
+          <span class="text-xs font-bold text-[#00A3E0] uppercase tracking-widest block mb-4 font-display">Pro Developer</span>
           <div class="flex items-baseline gap-1 mb-6">
-            <span class="text-4xl font-extrabold text-slate-900 font-display">$9</span>
-            <span class="text-sm text-slate-400">/ month</span>
+            <span class="text-5xl font-extrabold text-slate-900 font-display">$9</span>
+            <span class="text-sm text-slate-400 font-semibold">/ month</span>
           </div>
-          <ul class="space-y-4 text-sm text-slate-600 mb-8">
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Up to 3 Whitelisted Domains
+          <p class="text-slate-500 text-xs mb-6 font-medium">Best for small businesses and professional developers.</p>
+          <ul class="space-y-4 text-sm text-slate-600 mb-8 border-t border-slate-100 pt-6">
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Up to 3 Whitelisted Domains</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Access to LinkedIn Feed
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Instagram & LinkedIn Feeds</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              1-Hour Cache Refresh Frequency
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>1-Hour Cache Refresh</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-[#00A3E0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Auto-Publishing API (Post to LinkedIn)
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>LinkedIn Auto-Publishing API</span>
             </li>
           </ul>
         </div>
-        <button @click="redirectToCheckout('pro')" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg shadow-indigo-500/10">
-          Subscribe Pro
-        </button>
+        <div class="space-y-3">
+          <button @click="redirectToCheckout('pro')" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:shadow-xl hover:shadow-indigo-500/20 text-white font-bold py-3.5 px-6 rounded-xl transition duration-300">
+            Subscribe Pro
+          </button>
+          <span class="block text-[10px] text-center text-slate-400 font-semibold">14-Day Money-Back Guarantee</span>
+        </div>
       </div>
 
       <!-- Agency -->
-      <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:border-[#00A3E0]/20 transition duration-300 shadow-sm hover:shadow-md">
+      <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:border-[#00A3E0]/30 transition duration-300 shadow-sm hover:shadow-2xl hover:scale-[1.01] transform">
         <div>
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-4 font-display">Agency Growth</span>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4 font-display">Agency Growth</span>
           <div class="flex items-baseline gap-1 mb-6">
-            <span class="text-4xl font-extrabold text-slate-900 font-display">$29</span>
-            <span class="text-sm text-slate-400">/ month</span>
+            <span class="text-5xl font-extrabold text-slate-900 font-display">$29</span>
+            <span class="text-sm text-slate-400 font-semibold">/ month</span>
           </div>
-          <ul class="space-y-4 text-sm text-slate-500 mb-8">
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Up to 10 Whitelisted Domains
+          <p class="text-slate-500 text-xs mb-6 font-medium">Designed for agencies building sites for multiple clients.</p>
+          <ul class="space-y-4 text-sm text-slate-600 mb-8 border-t border-slate-100 pt-6">
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Up to 10 Whitelisted Domains</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Up to 10 Connected Social Profiles
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Up to 10 Connected Profiles</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Hourly Refresh Cache
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Hourly Refresh Rate</span>
             </li>
-            <li class="flex items-center gap-2.5">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Priority Developer Support
+            <li class="flex items-center gap-3">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span>Priority Developer Support</span>
             </li>
           </ul>
         </div>
-        <button @click="redirectToCheckout('agency')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-xl transition duration-150">
-          Subscribe Agency
-        </button>
+        <div class="space-y-3">
+          <button @click="redirectToCheckout('agency')" class="w-full bg-slate-900 hover:bg-[#00A3E0] hover:shadow-lg hover:shadow-[#00A3E0]/15 text-white font-bold py-3.5 px-6 rounded-xl transition duration-300">
+            Subscribe Agency
+          </button>
+          <span class="block text-[10px] text-center text-slate-400 font-semibold">Instant activation • Cancel anytime</span>
+        </div>
       </div>
 
     </div>
   </section>
 
   <!-- FAQ Section (Alpine collapse compliant) -->
-  <section id="faq" class="py-24 max-w-[800px] mx-auto px-6">
+  <section id="faq" class="py-24 max-w-[850px] mx-auto px-6">
     <div class="text-center space-y-4 mb-16">
-      <h2 class="text-3xl md:text-5xl font-bold font-display text-slate-900 font-extrabold">Frequently Asked Questions</h2>
-      <p class="text-slate-500 text-base">
-        Everything you need to know about our performance-first social widgets.
+      <h2 class="text-3xl md:text-5xl font-extrabold font-display text-slate-950">Frequently Asked Questions</h2>
+      <p class="text-slate-500 text-base font-medium">
+        Everything you need to know about our high-performance, edge-cached social media widgets.
       </p>
     </div>
 
     <div class="space-y-4">
       
       <!-- FAQ item 1 -->
-      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all duration-300">
-        <button @click="activeFaq = (activeFaq === 1 ? null : 1)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-semibold hover:bg-slate-50">
-          How does Social Sync maintain 100/100 PageSpeed scores?
-          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 1 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <button @click="activeFaq = (activeFaq === 1 ? null : 1)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-extrabold hover:bg-slate-50/50 transition">
+          <span class="font-display">How does a slow Instagram widget impact my website's Google PageSpeed score?</span>
+          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 1 ? 'rotate-180 text-[#00A3E0]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div x-show="activeFaq === 1" x-collapse>
           <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-4 bg-slate-50/50 font-medium">
-            Instead of injecting heavy third-party JavaScript files and bloated rendering engines, we store your social feeds as raw JSON payloads directly at global network edge caches. Your browser downloads only a tiny unstyled data grid payload (under 3KB), keeping FCP under 50ms.
+            Standard social media widgets load heavy third-party scripts and cookies that block the browser's main rendering thread. This increases Cumulative Layout Shift (CLS) and First Contentful Paint (FCP), causing a direct drop in PageSpeed scores and organic Google search rankings.
           </div>
         </div>
       </div>
 
       <!-- FAQ item 2 -->
-      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all duration-300">
-        <button @click="activeFaq = (activeFaq === 2 ? null : 2)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-semibold hover:bg-slate-50">
-          Do Meta and LinkedIn access tokens expire?
-          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 2 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <button @click="activeFaq = (activeFaq === 2 ? null : 2)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-extrabold hover:bg-slate-50/50 transition">
+          <span class="font-display">Why does Social Sync load feeds faster than other social media plugins?</span>
+          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 2 ? 'rotate-180 text-[#00A3E0]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div x-show="activeFaq === 2" x-collapse>
           <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-4 bg-slate-50/50 font-medium">
-            Yes, OAuth tokens natively expire after 60 days. However, our system runs automated weekly cron scripts in the background that silently exchange and refresh your tokens. As long as your subscription is active, you will never have to re-auth again.
+            Instead of parsing heavy runtime scripts on every page load, Social Sync pre-caches compressed social feeds as lightweight, edge-native JSON files (under 3KB) on global edge servers. Feeds load in under 50ms with zero CPU blocking time.
           </div>
         </div>
       </div>
 
       <!-- FAQ item 3 -->
-      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all duration-300">
-        <button @click="activeFaq = (activeFaq === 3 ? null : 3)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-semibold hover:bg-slate-50">
-          What is the Domain-Origin Lock?
-          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 3 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <button @click="activeFaq = (activeFaq === 3 ? null : 3)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-extrabold hover:bg-slate-50/50 transition">
+          <span class="font-display">Can I display both Instagram and LinkedIn feeds using a single license?</span>
+          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 3 ? 'rotate-180 text-[#00A3E0]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div x-show="activeFaq === 3" x-collapse>
           <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-4 bg-slate-50/50 font-medium">
-            It is a security filter running at the network edge. When the embed script requests your feed, our edge server checks the request headers. If the request doesn't originate from your whitelisted domains, access is blocked, preventing other sites from using your license.
+            Yes! Our Pro Developer and Agency Growth plans allow you to integrate multiple active social media streams, including Instagram and LinkedIn, to display on your whitelisted web domains with no speed penalty.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ item 4 -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <button @click="activeFaq = (activeFaq === 4 ? null : 4)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-extrabold hover:bg-slate-50/50 transition">
+          <span class="font-display">How does the Domain-Origin Lock secure my social feed script?</span>
+          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 4 ? 'rotate-180 text-[#00A3E0]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        <div x-show="activeFaq === 4" x-collapse>
+          <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-4 bg-slate-50/50 font-medium">
+            The Domain-Origin Lock checks the HTTP origin headers at the edge network. If a request for your social feed is initiated from a domain not explicitly whitelisted in your console, the connection is instantly rejected, preventing license leeching.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ item 5 -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <button @click="activeFaq = (activeFaq === 5 ? null : 5)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-extrabold hover:bg-slate-50/50 transition">
+          <span class="font-display">Do I have to manually refresh my Meta and LinkedIn API tokens?</span>
+          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 5 ? 'rotate-180 text-[#00A3E0]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        <div x-show="activeFaq === 5" x-collapse>
+          <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-4 bg-slate-50/50 font-medium">
+            No. Meta and LinkedIn access tokens expire after 60 days, but Social Sync runs an automated weekly background cron job that refreshes client access keys. Feeds remain synced indefinitely without manual re-authorization.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ item 6 -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <button @click="activeFaq = (activeFaq === 6 ? null : 6)" class="w-full px-6 py-5 text-left flex items-center justify-between text-slate-800 font-extrabold hover:bg-slate-50/50 transition">
+          <span class="font-display">Is Social Sync GDPR and privacy law compliant?</span>
+          <svg class="w-5 h-5 text-slate-400 transform transition-transform duration-250" :class="activeFaq === 6 ? 'rotate-180 text-[#00A3E0]' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        <div x-show="activeFaq === 6" x-collapse>
+          <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-4 bg-slate-50/50 font-medium">
+            Yes. Social Sync does not drop tracking cookies, collect personal identifier data from your site visitors, or run external tracking code. Feeds are served as static layout assets, ensuring full GDPR, CCPA, and GDPR compliance.
           </div>
         </div>
       </div>

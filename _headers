@@ -1,0 +1,11 @@
+# =============================================
+# CLOUDFLARE EARLY HINTS (103) HEADERS
+# =============================================
+# IMPORTANT: If a hero/banner image changes on any page,
+# update the corresponding Link header below to match.
+
+# ---- Global (all pages) ----
+/*
+  Link: </index.css>; rel=preload; as=style
+  Link: <https://fonts.googleapis.com>; rel=preconnect
+  Link: <https://fonts.gstatic.com>; rel=preconnect; crossorigin
