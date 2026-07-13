@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Dashboard | CodeWays Social Sync</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00A3E0;
+    }
+  </style>
+
+  <!-- Shared Components & Alpine -->
+  <script src="/components.js" defer></script>
+  <script>
+    document.addEventListener('alpine:init', () => {
+      const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://127.0.0.1:8787' 
+        : 'https://social-api.codeways.co';
+
+      Alpine.data('dashboard', () => ({
+        token: '',
+        isLoading: true,
+        isValidated: false,
+        errorMsg: '',
+        successMsg: '',
+        
+        // Client Config loaded from API
+        clientSlug: '',
+        email: '',
+        plan: '',
+        maxDomains: 1,
+        
+        // Whitelisted domains edit state
+        domainList: [],
+        newDomainInput: '',
+        isSavingDomains: false,
+
+        // Social Connections
+        instagramName: '',
+        instagramProfile: '',
+        linkedinName: '',
+        linkedinProfile: '',
+        instagramAuthUrl: '',
+        linkedinAuthUrl: '',
+        
+        // Embed state
+        embedPlatform: 'instagram',
+        embedCode: '',
+
+        async init() {
+          // 1. Get token from URL or localStorage
+          const urlParams = new URLSearchParams(window.location.search);
+          this.token = urlParams.get('token') || localStorage.getItem('socialsync_session_token') || '';
+
+          if (!this.token) {
+            this.redirectToLogin();
+            return;
+          }
+
+          // Save token in storage for session persistence
+          localStorage.setItem('socialsync_session_token', this.token);
+          
+          // Clear query params so token isn't visible in address bar
+          if (urlParams.get('token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+
+          await this.loadDashboardData();
+        },
+
+        async loadDashboardData() {
+          this.isLoading = true;
+          this.errorMsg = '';
+          this.successMsg = '';
+
+          try {
+            const res = await fetch(`${apiHost}/api/dashboard/verify?token=${encodeURIComponent(this.token)}`);
+            const data = await res.json();
+
+            if (!res.ok) {
+              // Token expired or invalid
+              localStorage.removeItem('socialsync_session_token');
+              this.redirectToLogin();
+              return;
+            }
+
+            this.clientSlug = data.client;
+            this.email = data.email;
+            this.plan = data.plan;
+            this.maxDomains = data.maxDomains;
+            this.domainList = data.origins || [];
+            this.instagramName = data.instagramName || '';
+            this.instagramProfile = data.instagramProfile || '';
+            this.linkedinName = data.linkedinName || '';
+            this.linkedinProfile = data.linkedinProfile || '';
+            this.instagramAuthUrl = data.instagramAuthUrl || '';
+            this.linkedinAuthUrl = data.linkedinAuthUrl || '';
+            
+            this.isValidated = true;
+            this.updateEmbedCode();
+          } catch (err) {
+            this.errorMsg = err.message || "Failed to connect to the server.";
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        redirectToLogin() {
+          window.location.href = './dashboard-login.html';
+        },
+
+        // Domains list manipulation
+        addDomain() {
+          if (!this.newDomainInput) return;
+          const cleanDomain = this.newDomainInput.trim().toLowerCase().replace(/[^a-z0-9:.-]/g, '');
+          
+          if (!cleanDomain) {
+            this.errorMsg = "Invalid domain format.";
+            return;
+          }
+
+          if (this.domainList.includes(cleanDomain)) {
+            this.errorMsg = "Domain is already whitelisted.";
+            return;
+          }
+
+          if (this.domainList.length >= this.maxDomains) {
+            this.errorMsg = `Upgrade plan to add more domains (Plan Limit: ${this.maxDomains}).`;
+            return;
+          }
+
+          this.domainList.push(cleanDomain);
+          this.newDomainInput = '';
+          this.errorMsg = '';
+        },
+
+        removeDomain(index) {
+          this.domainList.splice(index, 1);
+          this.errorMsg = '';
+        },
+
+        async saveDomains() {
+          this.isSavingDomains = true;
+          this.errorMsg = '';
+          this.successMsg = '';
+
+          try {
+            const res = await fetch(`${apiHost}/api/dashboard/update-domains`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                token: this.token,
+                domains: this.domainList
+              })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || 'Failed to save domains');
+            }
+
+            this.domainList = data.domains;
+            this.successMsg = "Whitelisted domains successfully updated.";
+          } catch (err) {
+            this.errorMsg = err.message;
+          } finally {
+            this.isSavingDomains = false;
+          }
+        },
+
+        // Embed code generator
+        updateEmbedCode() {
+          const scriptOrigin = apiHost.replace('social-api.codeways.co', 'socialsync-7f6.pages.dev'); // Fallback structure
+          const resolvedScriptHost = apiHost;
+          
+          this.embedCode = `<div id="codeways-social-feed"></div>\n<script src="${resolvedScriptHost}/embed.js" data-client="${this.clientSlug}" data-platform="${this.embedPlatform}" defer><\/script>`;
+        },
+
+        copyEmbedCode() {
+          const copyText = document.getElementById("embed-snippet-input");
+          copyText.select();
+          copyText.setSelectionRange(0, 99999);
+          navigator.clipboard.writeText(copyText.value);
+
+          const btn = document.getElementById("copy-embed-btn");
+          const originalText = btn.textContent;
+          btn.textContent = "Copied! ✓";
+          setTimeout(() => {
+            btn.textContent = originalText;
+          }, 2000);
+        },
+
+        // Stripe billing portal
+        async redirectToBilling() {
+          this.isLoading = true;
+          this.errorMsg = '';
+
+          try {
+            const res = await fetch(`${apiHost}/api/dashboard/billing-portal`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: this.token })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || 'Failed to create billing session');
+            }
+
+            if (data.url) {
+              window.location.href = data.url;
+            }
+          } catch (err) {
+            this.errorMsg = err.message;
+            this.isLoading = false;
+          }
+        },
+
+        // Logout session
+        async logout() {
+          this.isLoading = true;
+          try {
+            await fetch(`${apiHost}/api/dashboard/logout`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: this.token })
+            });
+          } catch (err) {
+            console.error("Logout API error:", err);
+          } finally {
+            localStorage.removeItem('socialsync_session_token');
+            this.redirectToLogin();
+          }
+        }
+      }));
+    });
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.0/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
+</head>
+<body x-data="dashboard()" class="bg-[#f8fafc] text-slate-700 min-h-screen flex flex-col justify-between selection:bg-[#00A3E0] selection:text-white font-sans">
+
+  <!-- Component Navigation -->
+  <shared-nav></shared-nav>
+
+  <main class="flex-grow max-w-[1200px] w-full mx-auto px-6 py-12">
+    <!-- Initial Verification Loading State -->
+    <div x-show="isLoading && !isValidated" class="py-24 text-center space-y-4">
+      <svg class="animate-spin h-10 w-10 text-[#00A3E0] mx-auto" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="text-sm font-semibold text-slate-400">Loading your profile configuration...</p>
+    </div>
+
+    <!-- Main Dashboard Section -->
+    <div x-show="isValidated" x-cloak class="space-y-8">
+      
+      <!-- Top Overview Bar -->
+      <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-[#00A3E0]/10 rounded-2xl flex items-center justify-center text-lg font-bold text-[#00A3E0] font-display">S</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl font-extrabold text-slate-900 font-display" x-text="clientSlug"></h1>
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-sans">Active</span>
+            </div>
+            <p class="text-xs text-slate-400 font-semibold" x-text="email"></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-2 text-left">
+            <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Current Plan</span>
+            <span class="text-sm font-extrabold text-indigo-700 uppercase font-display" x-text="plan"></span>
+          </div>
+          <button @click="logout()" class="border border-slate-200 hover:bg-slate-50 text-slate-550 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm font-display">
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+      <!-- Feedback Banner Boxes -->
+      <div x-show="errorMsg" x-cloak class="bg-rose-500/10 border border-rose-500/20 text-rose-600 p-4 rounded-2xl text-sm font-medium">
+        <p x-text="errorMsg"></p>
+      </div>
+      <div x-show="successMsg" x-cloak class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4 rounded-2xl text-sm font-medium">
+        <p x-text="successMsg"></p>
+      </div>
+
+      <!-- Two Column Layout: Setup & Socials -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Column: Whitelisted Domains (Dynamic List) -->
+        <div class="lg:col-span-6 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
+          <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 font-display">Whitelisted Domains</h2>
+              <p class="text-xs text-slate-400 font-semibold">Verify allowed website origins requesting your feed.</p>
+            </div>
+            <span class="text-xs font-bold text-slate-400 font-mono" x-text="`${domainList.length} of ${maxDomains} used`"></span>
+          </div>
+
+          <!-- Domain Slots list -->
+          <div class="space-y-2">
+            <template x-for="(domain, index) in domainList" :key="index">
+              <div class="flex items-center justify-between bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-sm font-semibold text-slate-800">
+                <span x-text="domain" class="font-mono text-xs"></span>
+                <button @click="removeDomain(index)" class="text-slate-400 hover:text-rose-500 transition-colors text-lg px-2 select-none" aria-label="Remove domain">&times;</button>
+              </div>
+            </template>
+            <template x-if="domainList.length === 0">
+              <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 text-xs font-medium">
+                No whitelisted domains yet. Add one below.
+              </div>
+            </template>
+          </div>
+
+          <!-- Add Domain Input Box -->
+          <div x-show="domainList.length < maxDomains" class="flex gap-2">
+            <input type="text" x-model="newDomainInput" @keydown.enter.prevent="addDomain()" placeholder="e.g. example.co.za" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-950 focus:outline-none focus:border-[#00A3E0] focus:ring-1 focus:ring-[#00A3E0] text-sm font-medium">
+            <button @click="addDomain()" class="bg-slate-900 hover:bg-[#00A3E0] text-white px-5 rounded-xl font-bold text-xs transition shadow-sm font-display shrink-0">Add Slot</button>
+          </div>
+
+          <!-- Save Persist Button -->
+          <button @click="saveDomains()" :disabled="isSavingDomains" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl transition duration-150 shadow-md shadow-indigo-500/10 flex items-center justify-center gap-2">
+            <svg x-show="isSavingDomains" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span x-text="isSavingDomains ? 'Saving whitelist...' : 'Save Whitelisted Domains'"></span>
+          </button>
+        </div>
+
+        <!-- Right Column: Social Connection Status cards -->
+        <div class="lg:col-span-6 space-y-6">
+          
+          <!-- Social Profiles Card -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+              <h2 class="text-lg font-bold text-slate-900 font-display">Connected Social Feeds</h2>
+              <p class="text-xs text-slate-400 font-semibold">Authorize and cache your active social feeds.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+              <!-- Instagram Feed Status Card -->
+              <div class="border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-pink-50 border border-pink-100 flex items-center justify-center text-xl">📸</div>
+                  <div>
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Instagram Feed</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-extrabold text-slate-900" x-text="instagramName || 'Not Linked'"></span>
+                      <span class="w-2 h-2 rounded-full" :class="instagramName ? 'bg-emerald-500' : 'bg-slate-300'"></span>
+                    </div>
+                  </div>
+                </div>
+                <a :href="instagramAuthUrl" class="bg-slate-900 hover:bg-[#00A3E0] text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-sm font-display text-center block w-full sm:w-auto" x-text="instagramName ? 'Reconnect Instagram' : 'Link Instagram'"></a>
+              </div>
+
+              <!-- LinkedIn Feed Status Card -->
+              <div class="border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-[#0077b5]/10 border border-[#0077b5]/20 flex items-center justify-center text-xl text-[#0077b5]">💼</div>
+                  <div>
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">LinkedIn Profile</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-extrabold text-slate-900" x-text="linkedinName || 'Not Linked'"></span>
+                      <span class="w-2 h-2 rounded-full" :class="linkedinName ? 'bg-emerald-500' : 'bg-slate-300'"></span>
+                    </div>
+                  </div>
+                </div>
+                <template x-if="plan !== 'starter'">
+                  <a :href="linkedinAuthUrl" class="bg-slate-900 hover:bg-[#00A3E0] text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-sm font-display text-center block w-full sm:w-auto" x-text="linkedinName ? 'Reconnect LinkedIn' : 'Link LinkedIn'"></a>
+                </template>
+                <template x-if="plan === 'starter'">
+                  <div class="text-slate-400 font-semibold text-xs bg-slate-50 border border-slate-100 px-4 py-2 rounded-lg text-center font-sans">
+                    LinkedIn Locked (Starter)
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Billing Manage Card -->
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 font-display">Billing & Subscription</h2>
+              <p class="text-xs text-slate-400 font-semibold">Manage payment cards, invoice receipts, and active plans.</p>
+            </div>
+            
+            <div class="flex items-center justify-between bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4">
+              <div class="space-y-1">
+                <span class="block text-[9px] font-bold text-indigo-500 uppercase tracking-wider">Account Package</span>
+                <span class="text-sm font-extrabold text-slate-900 uppercase font-display" x-text="plan"></span>
+              </div>
+              <button @click="redirectToBilling()" class="bg-slate-900 hover:bg-[#00A3E0] text-white font-bold py-2.5 px-5 rounded-xl text-xs transition shadow-sm font-display shrink-0">
+                Manage Billing Portal
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Embed Generator Section -->
+      <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 font-display">Edge Embed Snippet</h2>
+          <p class="text-xs text-slate-400 font-semibold">Copy this lightweight HTML code block and paste it anywhere in your site layout.</p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Feed selector tab -->
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <button @click="embedPlatform = 'instagram'; updateEmbedCode()" :class="embedPlatform === 'instagram' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-400'" class="font-bold text-xs pb-1 uppercase tracking-wider font-sans transition-colors">Instagram Feed</button>
+            <span class="text-slate-200">|</span>
+            <button @click="embedPlatform = 'linkedin'; updateEmbedCode()" :class="embedPlatform === 'linkedin' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-400'" class="font-bold text-xs pb-1 uppercase tracking-wider font-sans transition-colors">LinkedIn Feed</button>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <input type="text" id="embed-snippet-input" readonly :value="embedCode" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs text-[#00A3E0] font-mono focus:outline-none">
+            <button id="copy-embed-btn" @click="copyEmbedCode()" class="bg-[#00A3E0] hover:bg-opacity-90 text-white px-5 py-3.5 rounded-xl text-xs transition font-semibold font-display shrink-0">Copy Snippet</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Component Footer -->
+  <shared-footer></shared-footer>
+
+</body>
+</html>

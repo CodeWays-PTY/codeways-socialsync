@@ -16,6 +16,7 @@ class SharedNav extends HTMLElement {
             <a href="/#compare" class="hover:text-slate-900 transition-colors">Performance</a>
             <a href="/#pricing" class="hover:text-slate-900 transition-colors">Pricing & Plans</a>
             <a href="/#faq" class="hover:text-slate-900 transition-colors">FAQ</a>
+            <a href="/dashboard.html" class="hover:text-slate-900 transition-colors font-semibold text-[#00A3E0]">Dashboard</a>
           </nav>
 
           <!-- CTA -->
@@ -64,6 +65,10 @@ class SharedNav extends HTMLElement {
                 <a href="/#faq" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between">
                   FAQ
                   <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
+                <a href="/dashboard.html" onclick="toggleMobileMenu(false)" class="text-slate-800 hover:text-[#00A3E0] flex items-center justify-between font-semibold">
+                  Dashboard
+                  <svg class="w-5 h-5 text-[#00A3E0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </a>
               </nav>
             </div>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Sign In | CodeWays Social Sync</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00A3E0;
+    }
+  </style>
+
+  <!-- Shared Components & Alpine -->
+  <script src="/components.js" defer></script>
+  <script>
+    document.addEventListener('alpine:init', () => {
+      const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://127.0.0.1:8787' 
+        : 'https://social-api.codeways.co';
+
+      Alpine.data('dashboardLogin', () => ({
+        email: '',
+        isLoading: false,
+        isSuccess: false,
+        errorMsg: '',
+        successMsg: '',
+
+        async submitLogin() {
+          if (!this.email) return;
+
+          this.isLoading = true;
+          this.errorMsg = '';
+          this.successMsg = '';
+
+          try {
+            const res = await fetch(`${apiHost}/api/dashboard/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: this.email })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || 'Failed to dispatch magic link');
+            }
+
+            this.isSuccess = true;
+            this.successMsg = data.message || "A secure magic link has been sent to your email inbox.";
+          } catch (err) {
+            this.errorMsg = err.message || "An error occurred. Please try again.";
+          } finally {
+            this.isLoading = false;
+          }
+        }
+      }));
+    });
+  </script>
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.0/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
+</head>
+<body x-data="dashboardLogin()" class="bg-[#f8fafc] text-slate-700 min-h-screen flex flex-col justify-between selection:bg-[#00A3E0] selection:text-white font-sans">
+
+  <!-- Component Navigation -->
+  <shared-nav></shared-nav>
+
+  <!-- Sign In Card Container -->
+  <main class="flex-grow flex items-center justify-center p-6 my-8">
+    <div class="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 space-y-6 relative overflow-hidden shadow-xl">
+      <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
+
+      <!-- Header Section -->
+      <div class="text-center space-y-2">
+        <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00A3E0] to-indigo-500 flex items-center justify-center text-md font-bold text-white font-display mx-auto">S</span>
+        <h1 class="text-2xl font-extrabold text-slate-900 font-display">Sign In to Social Sync</h1>
+        <p class="text-sm text-slate-400 font-semibold">Enter your email to receive a secure magic login link.</p>
+      </div>
+
+      <!-- Error Message Box -->
+      <div x-show="errorMsg" x-cloak class="bg-rose-500/10 border border-rose-500/20 text-rose-600 p-4 rounded-xl text-sm font-medium">
+        <p x-text="errorMsg"></p>
+      </div>
+
+      <!-- Success Message Box -->
+      <div x-show="isSuccess" x-cloak class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-5 rounded-xl text-sm font-medium space-y-3 text-center">
+        <div class="w-10 h-10 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold text-sm mx-auto">✓</div>
+        <p x-text="successMsg"></p>
+        <span class="block text-xs text-slate-400 font-semibold">Ensure you check your spam/junk folder if the email does not arrive in a few seconds.</span>
+      </div>
+
+      <!-- Sign In Form -->
+      <form x-show="!isSuccess" @submit.prevent="submitLogin()" class="space-y-4">
+        <div>
+          <label for="email" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-display">Registered Subscription Email</label>
+          <div class="relative">
+            <input type="email" id="email" required x-model="email" placeholder="you@company.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-950 placeholder-slate-400 focus:outline-none focus:border-[#00A3E0] focus:ring-1 focus:ring-[#00A3E0] transition font-medium text-sm">
+            <span x-show="email" @click="email = ''" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer font-bold select-none text-sm">&times;</span>
+          </div>
+        </div>
+
+        <button type="submit" :disabled="isLoading" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10 text-white font-bold py-4 px-6 rounded-xl transition duration-150 flex items-center justify-center gap-2">
+          <svg x-show="isLoading" class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span x-text="isLoading ? 'Sending Magic Link...' : 'Send Magic Link'"></span>
+        </button>
+      </form>
+
+      <div class="pt-4 border-t border-slate-100 text-center">
+        <a href="/" class="text-xs text-slate-400 hover:text-[#00A3E0] font-semibold transition">Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Component Footer -->
+  <shared-footer></shared-footer>
+
+</body>
+</html>
