@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful | CodeWays Social Sync</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Shared Components -->
+  <script src="./components.js" defer></script>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col justify-between selection:bg-[#00A3E0] selection:text-white font-sans">
+
+  <!-- Component Navigation Placeholder -->
+  <div id="shared-nav"></div>
+
+  <!-- Content Container -->
+  <main class="flex-grow flex items-center justify-center p-6 my-8">
+    <div class="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 text-center space-y-6 relative overflow-hidden shadow-xl">
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
+      
+      <!-- Checkmark Icon -->
+      <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto animate-bounce font-bold">
+        ✓
+      </div>
+
+      <div class="space-y-2">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 font-display">Payment Successful!</h1>
+        <p class="text-sm text-slate-500 font-medium">
+          Your subscription has been successfully activated. An onboarding link has also been emailed to your billing address.
+        </p>
+      </div>
+
+      <!-- Onboarding Button -->
+      <div class="pt-4">
+        <button onclick="startOnboarding()" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-xl transition duration-150 shadow-lg shadow-indigo-500/15">
+          Start Self-Service Onboarding
+        </button>
+      </div>
+      
+      <p class="text-xs text-slate-400 font-medium">
+        It takes less than 2 minutes to whitelist your domains and link your socials.
+      </p>
+    </div>
+  </main>
+
+  <!-- Component Footer Placeholder -->
+  <div id="shared-footer"></div>
+
+  <script>
+    function startOnboarding() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      if (!token) {
+        alert("Onboarding token missing. Please check your email or contact support.");
+        return;
+      }
+      
+      window.location.href = `./onboarding.html?token=${encodeURIComponent(token)}`;
+    }
+  </script>
+
+</body>
+</html>

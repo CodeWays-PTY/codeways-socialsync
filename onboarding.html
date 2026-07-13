@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup Onboarding | CodeWays Social Sync</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00A3E0;
+    }
+  </style>
+
+  <!-- Shared Components & Alpine -->
+  <script src="./components.js" defer></script>
+  <script>
+    document.addEventListener('alpine:init', () => {
+      const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://127.0.0.1:8787' 
+        : 'https://social-api.codeways.co';
+
+      Alpine.data('onboardingFlow', () => ({
+        token: '',
+        isLoading: true,
+        isValidated: false,
+        errorMsg: '',
+        
+        // Subscription Metadata
+        email: '',
+        plan: '',
+        
+        // Setup inputs
+        clientSlug: '',
+        domains: '',
+        
+        // Setup outputs
+        isProvisioned: false,
+        instagramAuthUrl: '',
+        linkedinAuthUrl: '',
+        embedScript: '',
+        
+        async init() {
+          const urlParams = new URLSearchParams(window.location.search);
+          this.token = urlParams.get('token') || '';
+          
+          if (!this.token) {
+            this.isLoading = false;
+            this.errorMsg = "Onboarding token is missing. Please follow the link sent to your email.";
+            return;
+          }
+          
+          await this.verifyToken();
+        },
+
+        async verifyToken() {
+          this.isLoading = true;
+          this.errorMsg = '';
+          
+          try {
+            const res = await fetch(`${apiHost}/api/onboarding/verify?token=${encodeURIComponent(this.token)}`);
+            const data = await res.json();
+            
+            if (!res.ok) {
+              throw new Error(data.error || 'Token verification failed');
+            }
+            
+            this.email = data.email;
+            this.plan = data.plan;
+            this.isValidated = true;
+          } catch (err) {
+            this.errorMsg = err.message || "Failed to contact the verification server.";
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        async submitSetup() {
+          if (!this.clientSlug || !this.domains) {
+            alert("Please fill in all setup fields.");
+            return;
+          }
+
+          this.isLoading = true;
+          this.errorMsg = '';
+
+          try {
+            const payload = {
+              token: this.token,
+              clientSlug: this.clientSlug,
+              domains: this.domains
+            };
+
+            const res = await fetch(`${apiHost}/api/onboarding/setup`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || 'Provisioning setup failed');
+            }
+
+            this.instagramAuthUrl = data.instagramAuthUrl;
+            this.linkedinAuthUrl = data.linkedinAuthUrl;
+            this.embedScript = data.embedScript;
+            this.isProvisioned = true;
+          } catch (err) {
+            this.errorMsg = err.message;
+          } finally {
+            this.isLoading = false;
+          }
+        },
+
+        copyEmbedCode() {
+          const copyText = document.getElementById("embed-code-snippet");
+          copyText.select();
+          copyText.setSelectionRange(0, 99999);
+          navigator.clipboard.writeText(copyText.value);
+          
+          const btn = document.getElementById("copy-btn");
+          const originalText = btn.textContent;
+          btn.textContent = "Copied! ✓";
+          setTimeout(() => {
+            btn.textContent = originalText;
+          }, 2000);
+        }
+      }));
+    });
+  </script>
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.0/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
+</head>
+<body x-data="onboardingFlow()" class="bg-[#f8fafc] text-slate-700 min-h-screen flex flex-col justify-between selection:bg-[#00A3E0] selection:text-white font-sans">
+
+  <!-- Component Navigation Placeholder -->
+  <div id="shared-nav"></div>
+
+  <!-- Onboarding Content Container -->
+  <main class="flex-grow flex items-center justify-center p-6 my-8">
+    <div class="max-w-xl w-full bg-white border border-slate-200 rounded-3xl p-8 space-y-6 relative overflow-hidden shadow-xl">
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
+
+      <!-- Header Section -->
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <span class="w-8 h-8 rounded bg-gradient-to-tr from-[#00A3E0] to-indigo-500 flex items-center justify-center text-sm font-semibold text-white font-display">S</span>
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900 font-display">Social Sync Onboarding</h1>
+          <p class="text-xs text-slate-400 font-medium">Configure your website widget integration</p>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div x-show="isLoading" class="py-12 text-center space-y-4">
+        <svg class="animate-spin h-8 w-8 text-[#00A3E0] mx-auto" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-sm text-slate-400">Processing setup requests...</p>
+      </div>
+
+      <!-- Error State -->
+      <div x-show="errorMsg" x-cloak class="bg-rose-500/10 border border-rose-500/20 text-rose-600 p-4 rounded-xl text-sm font-medium space-y-2">
+        <p x-text="errorMsg"></p>
+        <template x-if="!isValidated && token">
+          <button @click="verifyToken()" class="text-xs text-rose-500 underline font-bold block">Retry verification</button>
+        </template>
+      </div>
+
+      <!-- Step 1: Token Validated, Input Slug & Domains -->
+      <div x-show="isValidated && !isProvisioned && !isLoading" x-cloak class="space-y-6">
+        
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-xs text-indigo-700 space-y-1">
+          <p class="font-bold">Subscription Info:</p>
+          <p>Plan: <span class="font-semibold text-slate-900 uppercase" x-text="plan"></span> | Customer: <span class="font-semibold text-slate-900" x-text="email"></span></p>
+        </div>
+
+        <form @submit.prevent="submitSetup()" class="space-y-4">
+          <div>
+            <label for="client-slug" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 font-display">Desired Client Identifier / Slug</label>
+            <input type="text" id="client-slug" required x-model="clientSlug" placeholder="e.g. voir-visuals" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-950 placeholder-slate-400 focus:outline-none focus:border-[#00A3E0] focus:ring-1 focus:ring-[#00A3E0] transition font-medium text-sm">
+            <span class="block text-[11px] text-slate-400 mt-1 font-medium">Lowercase letters, numbers, and dashes only. Used in your feed source API endpoint.</span>
+          </div>
+
+          <div>
+            <label for="domains" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 font-display">Whitelisted Domains (Comma Separated)</label>
+            <input type="text" id="domains" required x-model="domains" placeholder="e.g. localhost, voir-visuals.co.za" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-950 placeholder-slate-400 focus:outline-none focus:border-[#00A3E0] focus:ring-1 focus:ring-[#00A3E0] transition font-medium text-sm">
+            <span class="block text-[11px] text-slate-400 mt-1 font-medium">Feeds requested outside whitelisted hosts will be blocked to secure your license credentials.</span>
+          </div>
+
+          <button type="submit" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-xl transition duration-150 shadow-lg shadow-indigo-500/15">
+            Save & Create License
+          </button>
+        </form>
+      </div>
+
+      <!-- Step 2 & 3: Provisioned, connect socials and grab code -->
+      <div x-show="isProvisioned && !isLoading" x-cloak class="space-y-6">
+        
+        <!-- Connect Links -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider font-display">Step 1: Connect Social Profiles</h3>
+          <p class="text-xs text-slate-400 font-medium">Authorize Social Sync to manage and cache your feeds at the edge.</p>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <a :href="instagramAuthUrl" target="_blank" class="bg-gradient-to-tr from-pink-600 to-indigo-600 hover:opacity-95 text-white font-semibold py-3 px-4 rounded-xl text-center text-sm transition block">
+              Link Instagram Profile
+            </a>
+            
+            <template x-if="plan !== 'starter'">
+              <a :href="linkedinAuthUrl" target="_blank" class="bg-[#0077b5] hover:opacity-95 text-white font-semibold py-3 px-4 rounded-xl text-center text-sm transition block font-medium">
+                Link LinkedIn Profile
+              </a>
+            </template>
+            <template x-if="plan === 'starter'">
+              <div class="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-center text-xs text-slate-400 flex items-center justify-center font-medium">
+                LinkedIn locked (Upgrade Plan)
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Embed Widget Code -->
+        <div class="space-y-3 pt-4 border-t border-slate-100">
+          <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider font-display">Step 2: Add Embed Code to Website</h3>
+          <p class="text-xs text-slate-400 font-medium">Copy and paste this HTML snippet where you want your social feed to display.</p>
+          
+          <div class="flex items-center space-x-2">
+            <input type="text" id="embed-code-snippet" readonly :value="embedScript" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-[#00A3E0] font-mono focus:outline-none">
+            <button id="copy-btn" @click="copyEmbedCode()" class="bg-[#00A3E0] hover:bg-opacity-90 text-white px-4 py-3 rounded-xl text-xs transition font-semibold shrink-0">Copy Code</button>
+          </div>
+        </div>
+        
+        <div class="pt-4 border-t border-slate-100 text-center">
+          <a href="/" class="text-xs text-slate-400 hover:text-slate-800 underline font-medium">Back to Homepage</a>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Component Footer Placeholder -->
+  <div id="shared-footer"></div>
+
+</body>
+</html>
