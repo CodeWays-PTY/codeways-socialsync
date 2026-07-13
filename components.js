@@ -8,7 +8,7 @@ class SharedNav extends HTMLElement {
       <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50">
         <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5 font-display">
-            <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-8 h-8 object-contain">
+            <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo.png" alt="Social Sync Logo" class="w-14 h-14 object-contain -my-3">
             Social Sync
           </a>
           
