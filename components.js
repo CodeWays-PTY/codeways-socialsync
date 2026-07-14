@@ -129,7 +129,7 @@ class SharedFooter extends HTMLElement {
             </div>
 
             <!-- Links Columns -->
-            <div class="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8">
+            <div class="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
               
               <!-- Product -->
               <div class="space-y-3">
@@ -142,25 +142,12 @@ class SharedFooter extends HTMLElement {
                 </ul>
               </div>
 
-              <!-- Security -->
-              <div class="space-y-3">
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-widest font-display">Security</h4>
-                <ul class="space-y-2 text-xs sm:text-sm font-medium">
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Domain Origin Lock</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Edge Firewall</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Encrypted Tokens</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Access Guard</span></li>
-                </ul>
-              </div>
-
               <!-- Resources -->
               <div class="space-y-3">
                 <h4 class="text-xs font-bold text-slate-900 uppercase tracking-widest font-display">Resources</h4>
                 <ul class="space-y-2 text-xs sm:text-sm font-medium">
                   <li><a href="https://codeways.co" target="_blank" class="hover:text-slate-900 transition">CodeWays Website</a></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Documentation</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">PageSpeed Tool</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Status Page</span></li>
+                  <li><a href="/blog" class="hover:text-slate-900 transition">Blog</a></li>
                 </ul>
               </div>
 
@@ -168,10 +155,8 @@ class SharedFooter extends HTMLElement {
               <div class="space-y-3">
                 <h4 class="text-xs font-bold text-slate-900 uppercase tracking-widest font-display">Legal</h4>
                 <ul class="space-y-2 text-xs sm:text-sm font-medium">
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Privacy Policy</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Terms of Service</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">Cookie Policy</span></li>
-                  <li><span class="hover:text-slate-900 cursor-pointer transition">GDPR Compliance</span></li>
+                  <li><a href="https://codeways.co/privacy" target="_blank" class="hover:text-slate-900 transition">Privacy Policy</a></li>
+                  <li><a href="https://codeways.co/terms" target="_blank" class="hover:text-slate-900 transition">Terms of Service</a></li>
                 </ul>
               </div>
 
