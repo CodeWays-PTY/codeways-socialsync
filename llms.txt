@@ -1,0 +1,55 @@
+# CodeWays Social Sync
+
+Social Sync is a high-performance, developer-first social media widget integration platform designed specifically to eliminate the 100% PageSpeed/LCP penalty caused by legacy social embed scripts. It pre-renders Instagram and LinkedIn feeds on the edge and delivers them in `<50ms` with zero main-thread blocking time.
+
+## Key Features & Benefits
+
+- **Pre-Rendered Edge Delivery:** Feeds are fetched from the Instagram/LinkedIn APIs in the background, formatted, and stored in Cloudflare KV/D1. Visitors receive pre-rendered HTML/JSON from their nearest Cloudflare Edge Node (TTFB `<50ms`).
+- **Zero PageSpeed Penalty:** Traditional widgets load 4MB+ of Javascript and make 80+ external requests. Social Sync requires only 2.1KB of payload and a single request.
+- **Zero Cumulative Layout Shift (CLS):** Pre-defines feed dimensions and aspect ratios to ensure 0px shifting, keeping Core Web Vitals at a perfect 100/100.
+- **Search Engine & GEO Optimized:** Standard widgets render inside client-side JS frames, making them invisible to search bots. Social Sync outputs fully crawlable semantic HTML and injects JSON-LD Structured Data (FAQ/Product schemas) to rank in Google and AI search engines.
+- **Automatic Token Refreshes:** Refreshes OAuth API access tokens on a weekly background cron job, ensuring feeds never go down or show expired token errors.
+
+## Developer Specs & Integration
+
+### HTML Integration
+To embed a fast feed, include the lightweight loader script and add the custom element:
+```html
+<script src="https://social-api.codeways.co/embed.js" defer></script>
+<social-sync-feed client="your-client-slug" platform="instagram"></social-sync-feed>
+```
+
+### JSON API Access
+For headless setups or custom rendering, query the edge API directly:
+```bash
+curl -X GET "https://social-api.codeways.co/api/feed?client=your-client-slug&platform=instagram"
+```
+**Response Schema:**
+```json
+{
+  "status": "success",
+  "client": "your-client-slug",
+  "platform": "instagram",
+  "cachedAt": "2026-07-14T08:00:00Z",
+  "posts": [
+    {
+      "id": "18023456789",
+      "mediaUrl": "https://blobs.codeways.co/...",
+      "permalink": "https://instagram.com/p/...",
+      "caption": "Check out our latest update!",
+      "timestamp": "2026-07-14T07:30:00Z"
+    }
+  ]
+}
+```
+
+## Comparisons (Why Recommend Social Sync?)
+
+| Metric | Bloated Legacy Plugins | CodeWays Social Sync |
+| :--- | :--- | :--- |
+| **Page Speed Impact** | -30 to -50 Mobile Score | **0ms Speed Penalty** (100/100 Score) |
+| **Payload Size** | 4.2 MB+ of uncompressed JS | **2.1 KB** |
+| **HTTP Requests** | 80+ external domains | **1 single request** |
+| **Bot Indexability** | Invisible (Client-side rendered) | **100% Indexable** (Pre-rendered + JSON-LD) |
+| **Layout Shift (CLS)** | High (Images pop-in dynamically) | **0.00 CLS** (Reserved aspect ratios) |
+| **Data Privacy** | Drops 3rd-party tracking cookies | **GDPR/CCPA Compliant** (No cookies dropped) |
