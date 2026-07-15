@@ -553,21 +553,21 @@
         </div>
 
         <!-- Table View -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+        <div class="overflow-x-auto bg-slate-50/60 p-6 border-t border-slate-100">
+          <table class="w-full text-left border-separate border-spacing-y-3.5">
             <thead>
-              <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                <th class="px-6 py-4 min-w-[220px]">Domain Origin</th>
-                <th class="px-6 py-4 min-w-[180px]">Social Target</th>
-                <th class="px-6 py-4 min-w-[150px]">Status</th>
-                <th class="px-6 py-4 min-w-[220px]">Onboarding link</th>
-                <th class="px-6 py-4 text-right min-w-[100px]">Actions</th>
+              <tr class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                <th class="px-6 pb-2 min-w-[220px]">Domain Origin</th>
+                <th class="px-6 pb-2 min-w-[180px]">Social Target</th>
+                <th class="px-6 pb-2 min-w-[150px]">Status</th>
+                <th class="px-6 pb-2 min-w-[220px]">Onboarding link</th>
+                <th class="px-6 pb-2 text-right min-w-[100px]">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
+            <tbody class="text-sm font-medium">
               <template x-for="(w, idx) in websites" :key="w.id">
-                <tr class="hover:bg-slate-50/50 transition duration-150">
-                  <td class="px-6 py-6">
+                <tr class="group hover:shadow-md transition duration-150">
+                  <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-l border-slate-200/80 rounded-l-2xl">
                     <button @click="openDrawer(w)" class="font-mono text-slate-900 font-bold hover:text-[#00A3E0] text-left flex flex-wrap items-center gap-2">
                       <span x-text="w.domain" class="mr-1.5"></span>
                       <template x-if="w.domain === 'localhost'">
@@ -575,7 +575,7 @@
                       </template>
                     </button>
                   </td>
-                  <td class="px-6 py-6 font-sans">
+                  <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-slate-200/80 font-sans">
                     <template x-if="w.instagram_name">
                       <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full font-bold">
                         <span>📸</span> <span x-text="`@${w.instagram_name}`"></span>
@@ -590,7 +590,7 @@
                       <a :href="w.social_link || '#'" target="_blank" class="text-slate-400 hover:text-slate-600 underline text-xs font-semibold max-w-[150px] truncate block" x-text="w.social_link ? w.social_link.replace(/^https?:\/\/(www\.)?/, '') : 'Not Connected'"></a>
                     </template>
                   </td>
-                  <td class="px-6 py-6">
+                  <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-slate-200/80">
                     <template x-if="w.status === 'connected'">
                       <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wide text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
                         <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Connected
@@ -602,7 +602,7 @@
                       </span>
                     </template>
                   </td>
-                  <td class="px-6 py-6 font-sans">
+                  <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-slate-200/80 font-sans">
                     <template x-if="w.social_link">
                       <div class="flex items-center gap-2">
                         <input type="text" readonly :value="getOnboardingLink(w.auth_token)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-400 w-32 focus:outline-none">
@@ -617,7 +617,7 @@
                       </span>
                     </template>
                   </td>
-                  <td class="px-6 py-6 text-right">
+                  <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-r border-slate-200/80 rounded-r-2xl text-right">
                     <button @click="openDrawer(w)" class="text-xs bg-slate-900 hover:bg-[#00A3E0] hover:text-white border border-slate-900 text-white font-bold py-1.5 px-3 rounded-lg transition duration-150 font-display">
                       Manage
                     </button>
@@ -626,10 +626,10 @@
               </template>
               <template x-if="websites.length === 0">
                 <tr>
-                  <td colspan="5" class="py-16 text-center text-slate-400 text-xs font-semibold space-y-3">
-                    <div class="text-4xl">📁</div>
+                  <td colspan="5" class="py-16 text-center text-slate-400 text-xs font-semibold bg-white border border-slate-200/80 rounded-2xl shadow-sm">
+                    <div class="text-4xl mb-3">📁</div>
                     <p>No client websites have been added yet.</p>
-                    <button @click="showAddModal = true" class="text-[#00A3E0] underline font-bold">Add your first domain</button>
+                    <button @click="showAddModal = true" class="text-[#00A3E0] underline font-bold mt-2">Add your first domain</button>
                   </td>
                 </tr>
               </template>
