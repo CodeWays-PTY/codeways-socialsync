@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Your Social Feed | Social Sync</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="https://blobs.codeways.co/cdn-cgi/image/width=32,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://blobs.codeways.co/cdn-cgi/image/width=192,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png">
+  <link rel="apple-touch-icon" href="https://blobs.codeways.co/cdn-cgi/image/width=180,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png">
+  
+  <!-- SEO & Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00A3E0;
+    }
+  </style>
+
+  <!-- Alpine.js Initialization -->
+  <script>
+    document.addEventListener('alpine:init', () => {
+      const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://127.0.0.1:8787' 
+        : 'https://social-api.codeways.co';
+
+      Alpine.data('clientAuth', () => ({
+        token: '',
+        isLoading: true,
+        isValidated: false,
+        errorMsg: '',
+        domain: '',
+        agencyEmail: '',
+        instagramAuthUrl: '',
+        linkedinAuthUrl: '',
+        socialLink: '',
+
+        async init() {
+          const urlParams = new URLSearchParams(window.location.search);
+          this.token = urlParams.get('token') || '';
+
+          if (!this.token) {
+            this.isLoading = false;
+            this.errorMsg = "Authentication token is missing. Please ask your service provider for the correct link.";
+            return;
+          }
+
+          await this.verifyToken();
+        },
+
+        async verifyToken() {
+          this.isLoading = true;
+          this.errorMsg = '';
+          try {
+            const res = await fetch(`${apiHost}/api/client-auth/verify?token=${encodeURIComponent(this.token)}`);
+            const data = await res.json();
+
+            if (!res.ok) {
+              throw new Error(data.error || 'Token verification failed');
+            }
+
+            this.domain = data.domain;
+            this.agencyEmail = data.agencyEmail;
+            this.instagramAuthUrl = data.instagramAuthUrl;
+            this.linkedinAuthUrl = data.linkedinAuthUrl;
+            this.socialLink = data.socialLink;
+            this.isValidated = true;
+          } catch (err) {
+            this.errorMsg = err.message || "Failed to contact the verification server.";
+          } finally {
+            this.isLoading = false;
+          }
+        }
+      }));
+    });
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.0/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
+</head>
+<body x-data="clientAuth()" class="bg-[#f8fafc] text-slate-700 min-h-screen flex flex-col justify-between selection:bg-[#00A3E0] selection:text-white font-sans">
+
+  <!-- Header -->
+  <header class="w-full bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <img src="https://blobs.codeways.co/cdn-cgi/image/width=100,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png" alt="Social Sync Logo" class="w-9 h-9 object-contain">
+        <span class="text-lg font-bold text-slate-900 font-display">Social Sync</span>
+      </div>
+      <div class="text-xs text-slate-400 font-semibold font-sans">
+        Powered by CodeWays
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow flex items-center justify-center p-6 my-12">
+    <div class="max-w-lg w-full bg-white border border-slate-200 rounded-[32px] p-8 space-y-6 relative overflow-hidden shadow-xl">
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
+
+      <!-- Header Section -->
+      <div class="flex items-center gap-4 border-b border-slate-100 pb-5">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl">🔗</div>
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900 font-display">Feed Authorization</h1>
+          <p class="text-xs text-slate-400 font-semibold">Link your social media to display on your site</p>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div x-show="isLoading" class="py-12 text-center space-y-4">
+        <svg class="animate-spin h-8 w-8 text-[#00A3E0] mx-auto" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-sm font-semibold text-slate-400">Verifying secure connection details...</p>
+      </div>
+
+      <!-- Error State -->
+      <div x-show="errorMsg" x-cloak class="bg-rose-500/10 border border-rose-500/20 text-rose-600 p-4 rounded-2xl text-sm font-medium space-y-3">
+        <p x-text="errorMsg" class="font-sans leading-relaxed"></p>
+        <template x-if="token">
+          <button @click="verifyToken()" class="text-xs text-rose-600 hover:text-rose-700 underline font-bold block">Retry connection</button>
+        </template>
+      </div>
+
+      <!-- Main Config Flow -->
+      <div x-show="isValidated" x-cloak class="space-y-6">
+        <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 space-y-3.5">
+          <p class="text-sm text-slate-600 leading-relaxed font-sans">
+            Your service provider (<span class="font-bold text-slate-900" x-text="agencyEmail"></span>) has requested connection to display your public social media feed on your website:
+          </p>
+          <div class="bg-white border border-slate-200/80 rounded-xl p-3 flex items-center justify-between shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Target Domain</span>
+            <span class="font-mono text-sm font-bold text-[#00A3E0]" x-text="domain"></span>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Connect Your Account</h2>
+          
+          <div class="grid grid-cols-1 gap-3">
+            <!-- Instagram -->
+            <a :href="instagramAuthUrl" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-95 text-white font-bold py-4 px-6 rounded-2xl transition duration-150 shadow-md shadow-rose-500/15 flex items-center justify-between group">
+              <div class="flex items-center gap-3.5">
+                <span class="text-xl">📸</span>
+                <div class="text-left">
+                  <span class="block text-sm font-extrabold font-display">Instagram Business</span>
+                  <span class="block text-[10px] opacity-75 font-sans font-semibold">Authorize media feed basic reader</span>
+                </div>
+              </div>
+              <span class="text-lg transition-transform group-hover:translate-x-1">→</span>
+            </a>
+
+            <!-- LinkedIn -->
+            <a :href="linkedinAuthUrl" class="bg-gradient-to-r from-[#0077b5] to-indigo-600 hover:opacity-95 text-white font-bold py-4 px-6 rounded-2xl transition duration-150 shadow-md shadow-indigo-500/15 flex items-center justify-between group">
+              <div class="flex items-center gap-3.5">
+                <span class="text-xl">💼</span>
+                <div class="text-left">
+                  <span class="block text-sm font-extrabold font-display">LinkedIn Account</span>
+                  <span class="block text-[10px] opacity-75 font-sans font-semibold">Authorize profile feed reader</span>
+                </div>
+              </div>
+              <span class="text-lg transition-transform group-hover:translate-x-1">→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Disclosures/Privacy -->
+        <div class="border-t border-slate-100 pt-4 text-[11px] text-slate-400 leading-relaxed font-sans space-y-1.5">
+          <p class="font-bold uppercase tracking-wider text-slate-500">🔒 Security & Privacy Information</p>
+          <p>
+            By connecting, you authorize Social Sync to securely read and display your public posts on your website. 
+            We do not have access to your personal messages, credentials, or administrative settings. You can disconnect this link at any time in your platform settings.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full py-6 border-t border-slate-200 bg-white">
+    <div class="max-w-[1200px] mx-auto px-6 text-center text-xs text-slate-400 font-semibold font-sans">
+      &copy; 2026 Social Sync. All rights reserved.
+    </div>
+  </footer>
+
+</body>
+</html>

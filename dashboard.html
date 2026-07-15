@@ -28,6 +28,8 @@
 
   <style>
     [x-cloak] { display: none !important; }
+    
+    /* Custom Thin Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -41,6 +43,49 @@
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #00A3E0;
+    }
+
+    /* Custom Toggles/Checkboxes/Radio buttons */
+    .custom-checkbox {
+      appearance: none;
+      background-color: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      padding: 9px;
+      border-radius: 6px;
+      display: inline-block;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .custom-checkbox:checked {
+      background-color: #00A3E0;
+      border-color: #00A3E0;
+    }
+    .custom-checkbox:checked::after {
+      content: '✓';
+      font-size: 11px;
+      color: white;
+      position: absolute;
+      top: 1px;
+      left: 4.5px;
+      font-weight: bold;
+    }
+
+    .custom-radio {
+      appearance: none;
+      background-color: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      padding: 9px;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .custom-radio:checked {
+      background-color: white;
+      border-color: #00A3E0;
+      border-width: 5px;
     }
   </style>
 
@@ -59,31 +104,36 @@
         errorMsg: '',
         successMsg: '',
         
-        // Client Config loaded from API
+        // Client Config
         clientSlug: '',
         email: '',
         plan: '',
         maxDomains: 1,
-        
-        // Whitelisted domains edit state
-        domainList: [],
-        newDomainInput: '',
-        isSavingDomains: false,
 
-        // Social Connections
-        instagramName: '',
-        instagramProfile: '',
-        linkedinName: '',
-        linkedinProfile: '',
-        instagramAuthUrl: '',
-        linkedinAuthUrl: '',
+        // Websites/Domains Managed
+        websites: [],
         
-        // Embed state
-        embedPlatform: 'instagram',
-        embedCode: '',
+        // Add Website Form State
+        showAddModal: false,
+        newDomain: '',
+        newSocialLink: '',
+        isAddingWebsite: false,
+
+        // Upgrade Simulation State
+        isUpgradingPlan: false,
+        isBillingPortalMocked: false,
+
+        // Sliding Drawer Detail View State
+        showDrawer: false,
+        selectedWebsite: null,
+        drawerDomain: '',
+        drawerSocialLink: '',
+        isSavingDrawer: false,
+        isDeletingWebsite: false,
+        drawerEmbedPlatform: 'instagram',
+        drawerEmbedCode: '',
 
         async init() {
-          // 1. Get token from URL or localStorage
           const urlParams = new URLSearchParams(window.location.search);
           this.token = urlParams.get('token') || localStorage.getItem('socialsync_session_token') || '';
 
@@ -92,11 +142,20 @@
             return;
           }
 
-          // Save token in storage for session persistence
           localStorage.setItem('socialsync_session_token', this.token);
           
-          // Clear query params so token isn't visible in address bar
           if (urlParams.get('token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+
+          // Check if billing mocked or redirect success parameter exists
+          if (urlParams.get('billing_mocked') === 'true') {
+            this.isBillingPortalMocked = true;
+          }
+
+          if (urlParams.get('payment_success') === 'true') {
+            this.showAddModal = true;
+            this.successMsg = "Plan upgraded successfully! You can now add your new website.";
             window.history.replaceState({}, document.title, window.location.pathname);
           }
 
@@ -106,14 +165,11 @@
         async loadDashboardData() {
           this.isLoading = true;
           this.errorMsg = '';
-          this.successMsg = '';
-
           try {
             const res = await fetch(`${apiHost}/api/dashboard/verify?token=${encodeURIComponent(this.token)}`);
             const data = await res.json();
 
             if (!res.ok) {
-              // Token expired or invalid
               localStorage.removeItem('socialsync_session_token');
               this.redirectToLogin();
               return;
@@ -123,18 +179,10 @@
             this.email = data.email;
             this.plan = data.plan;
             this.maxDomains = data.maxDomains;
-            this.domainList = data.origins || [];
-            this.instagramName = data.instagramName || '';
-            this.instagramProfile = data.instagramProfile || '';
-            this.linkedinName = data.linkedinName || '';
-            this.linkedinProfile = data.linkedinProfile || '';
-            this.instagramAuthUrl = data.instagramAuthUrl || '';
-            this.linkedinAuthUrl = data.linkedinAuthUrl || '';
-            
+            this.websites = data.websites || [];
             this.isValidated = true;
-            this.updateEmbedCode();
           } catch (err) {
-            this.errorMsg = err.message || "Failed to connect to the server.";
+            this.errorMsg = err.message || "Failed to load dashboard statistics.";
           } finally {
             this.isLoading = false;
           }
@@ -144,92 +192,105 @@
           window.location.href = './dashboard-login.html';
         },
 
-        // Domains list manipulation
-        addDomain() {
-          if (!this.newDomainInput) return;
-          const cleanDomain = this.newDomainInput.trim().toLowerCase().replace(/[^a-z0-9:.-]/g, '');
-          
-          if (!cleanDomain) {
-            this.errorMsg = "Invalid domain format.";
-            return;
-          }
-
-          if (this.domainList.includes(cleanDomain)) {
-            this.errorMsg = "Domain is already whitelisted.";
-            return;
-          }
-
-          if (this.domainList.length >= this.maxDomains) {
-            this.errorMsg = `Upgrade plan to add more domains (Plan Limit: ${this.maxDomains}).`;
-            return;
-          }
-
-          this.domainList.push(cleanDomain);
-          this.newDomainInput = '';
-          this.errorMsg = '';
+        // Onboarding Link Generator
+        getOnboardingLink(authToken) {
+          return `${window.location.origin}/client-auth.html?token=${authToken}`;
         },
 
-        removeDomain(index) {
-          this.domainList.splice(index, 1);
-          this.errorMsg = '';
+        copyLink(authToken, elementId) {
+          const link = this.getOnboardingLink(authToken);
+          navigator.clipboard.writeText(link);
+
+          const btn = document.getElementById(elementId);
+          if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Copied! ✓";
+            setTimeout(() => {
+              btn.innerHTML = originalText;
+            }, 2000);
+          }
         },
 
-        async saveDomains() {
-          this.isSavingDomains = true;
+        // Add Website Flow
+        async submitAddWebsite() {
+          if (!this.newDomain) {
+            this.errorMsg = "Domain name is required.";
+            return;
+          }
+
+          // Limit check
+          if (this.websites.length >= this.maxDomains) {
+            this.showAddModal = false;
+            this.errorMsg = `Slot limit reached (${this.maxDomains}/${this.maxDomains}). Please upgrade to add more websites.`;
+            return;
+          }
+
+          this.isAddingWebsite = true;
           this.errorMsg = '';
           this.successMsg = '';
 
           try {
-            const res = await fetch(`${apiHost}/api/dashboard/update-domains`, {
+            const payload = {
+              token: this.token,
+              domain: this.newDomain,
+              socialLink: this.newSocialLink
+            };
+
+            const res = await fetch(`${apiHost}/api/dashboard/add-website`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                token: this.token,
-                domains: this.domainList
-              })
+              body: JSON.stringify(payload)
             });
 
             const data = await res.json();
             if (!res.ok) {
-              throw new Error(data.error || 'Failed to save domains');
+              if (data.error === 'limit_reached') {
+                throw new Error("Limit reached. Please purchase an upgrade first.");
+              }
+              throw new Error(data.error || 'Failed to add website');
             }
 
-            this.domainList = data.domains;
-            this.successMsg = "Whitelisted domains successfully updated.";
+            this.newDomain = '';
+            this.newSocialLink = '';
+            this.showAddModal = false;
+            this.successMsg = "Website added successfully! Copy and share the onboarding link with your client.";
+            await this.loadDashboardData();
           } catch (err) {
             this.errorMsg = err.message;
           } finally {
-            this.isSavingDomains = false;
+            this.isAddingWebsite = false;
           }
         },
 
-        // Embed code generator
-        updateEmbedCode() {
-          const scriptOrigin = apiHost.replace('social-api.codeways.co', 'socialsync-7f6.pages.dev'); // Fallback structure
-          const resolvedScriptHost = apiHost;
-          
-          this.embedCode = `<div id="codeways-social-feed">\n  <!-- Social Sync Feed -->\n</div>\n<script src="${resolvedScriptHost}/embed.js" data-client="${this.clientSlug}" data-platform="${this.embedPlatform}" defer><\/script>`;
+        // Upgrade Simulation (Local Test Mode)
+        async simulateUpgrade(planType) {
+          this.isUpgradingPlan = true;
+          this.errorMsg = '';
+          this.successMsg = '';
+          try {
+            const res = await fetch(`${apiHost}/api/dashboard/mock-upgrade`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: this.token, plan: planType })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Mock upgrade failed");
+
+            this.successMsg = `Account plan upgraded successfully to ${planType.toUpperCase()}!`;
+            // Simulate Stripe redirect loop by adding param
+            window.location.search = '?payment_success=true';
+          } catch (err) {
+            this.errorMsg = err.message;
+          } finally {
+            this.isUpgradingPlan = false;
+          }
         },
 
-        copyEmbedCode() {
-          const copyText = document.getElementById("embed-snippet-input");
-          copyText.select();
-          copyText.setSelectionRange(0, 99999);
-          navigator.clipboard.writeText(copyText.value);
-
-          const btn = document.getElementById("copy-embed-btn");
-          const originalText = btn.textContent;
-          btn.textContent = "Copied! ✓";
-          setTimeout(() => {
-            btn.textContent = originalText;
-          }, 2000);
-        },
-
-        // Stripe billing portal
+        // Manage Billing Portal Redirection
         async redirectToBilling() {
           this.isLoading = true;
           this.errorMsg = '';
-
           try {
             const res = await fetch(`${apiHost}/api/dashboard/billing-portal`, {
               method: 'POST',
@@ -251,7 +312,105 @@
           }
         },
 
-        // Logout session
+        // Detailed Drawer Control
+        openDrawer(website) {
+          this.selectedWebsite = website;
+          this.drawerDomain = website.domain;
+          this.drawerSocialLink = website.social_link || '';
+          this.drawerEmbedPlatform = 'instagram';
+          this.updateDrawerEmbedCode();
+          this.showDrawer = true;
+        },
+
+        closeDrawer() {
+          this.showDrawer = false;
+          this.selectedWebsite = null;
+        },
+
+        updateDrawerEmbedCode() {
+          if (!this.selectedWebsite) return;
+          this.drawerEmbedCode = `<div id="codeways-social-feed">\n  <!-- Social Sync Feed -->\n</div>\n<script src="${apiHost}/embed.js" data-client="${this.clientSlug}" data-platform="${this.drawerEmbedPlatform}" defer><\/script>`;
+        },
+
+        copyDrawerEmbedSnippet() {
+          navigator.clipboard.writeText(this.drawerEmbedCode);
+          const btn = document.getElementById("copy-drawer-embed-btn");
+          if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = "Copied! ✓";
+            setTimeout(() => {
+              btn.textContent = originalText;
+            }, 2000);
+          }
+        },
+
+        async saveDrawerWebsite() {
+          if (!this.drawerDomain) {
+            alert("Domain name is required.");
+            return;
+          }
+
+          this.isSavingDrawer = true;
+          this.errorMsg = '';
+          this.successMsg = '';
+
+          try {
+            const payload = {
+              token: this.token,
+              websiteId: this.selectedWebsite.id,
+              domain: this.drawerDomain,
+              socialLink: this.drawerSocialLink
+            };
+
+            const res = await fetch(`${apiHost}/api/dashboard/update-website`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to update website details.");
+
+            this.closeDrawer();
+            this.successMsg = "Website details successfully updated. Onboarding token regenerated if changes were made.";
+            await this.loadDashboardData();
+          } catch (err) {
+            this.errorMsg = err.message;
+          } finally {
+            this.isSavingDrawer = false;
+          }
+        },
+
+        async deleteDrawerWebsite() {
+          if (!confirm(`Are you absolutely sure you want to delete ${this.selectedWebsite.domain}? All connected feeds and cache will be cleared.`)) {
+            return;
+          }
+
+          this.isDeletingWebsite = true;
+          this.errorMsg = '';
+          this.successMsg = '';
+
+          try {
+            const res = await fetch(`${apiHost}/api/dashboard/delete-website`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: this.token, websiteId: this.selectedWebsite.id })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to delete website.");
+
+            this.closeDrawer();
+            this.successMsg = "Website deleted successfully.";
+            await this.loadDashboardData();
+          } catch (err) {
+            this.errorMsg = err.message;
+          } finally {
+            this.isDeletingWebsite = false;
+          }
+        },
+
+        // Logout Session
         async logout() {
           this.isLoading = true;
           try {
@@ -276,31 +435,32 @@
 </head>
 <body x-data="dashboard()" class="bg-[#f8fafc] text-slate-700 min-h-screen flex flex-col justify-between selection:bg-[#00A3E0] selection:text-white font-sans">
 
-  <!-- Component Navigation -->
+  <!-- Navigation -->
   <shared-nav></shared-nav>
 
-  <main class="flex-grow max-w-[1200px] w-full mx-auto px-6 py-12">
-    <!-- Initial Verification Loading State -->
+  <main class="flex-grow max-w-[1200px] w-full mx-auto px-6 py-10 relative">
+
+    <!-- Loading State -->
     <div x-show="isLoading && !isValidated" class="py-24 text-center space-y-4">
       <svg class="animate-spin h-10 w-10 text-[#00A3E0] mx-auto" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <p class="text-sm font-semibold text-slate-400">Loading your profile configuration...</p>
+      <p class="text-sm font-semibold text-slate-400 font-sans">Syncing profile configurations...</p>
     </div>
 
     <!-- Main Dashboard Section -->
     <div x-show="isValidated" x-cloak class="space-y-8">
       
-      <!-- Top Overview Bar -->
-      <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <!-- Top Profile Card -->
+      <div class="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
         <div class="flex items-center gap-4">
-          <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png" alt="Social Sync Logo" class="w-16 h-16 object-contain bg-[#00A3E0]/5 p-2.5 rounded-2xl">
+          <img src="https://blobs.codeways.co/cdn-cgi/image/width=600,fit=scale-down,format=auto,metadata=keep,sharpen=0.5/social-sync-logo-mark.png" alt="Social Sync Logo" class="w-14 h-14 object-contain bg-[#00A3E0]/5 p-2 rounded-2xl">
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="text-xl font-extrabold text-slate-900 font-display" x-text="clientSlug"></h1>
-              <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-sans">Active</span>
+              <h1 class="text-lg font-extrabold text-slate-900 font-display" x-text="clientSlug"></h1>
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">Active</span>
             </div>
             <p class="text-xs text-slate-400 font-semibold" x-text="email"></p>
           </div>
@@ -308,165 +468,351 @@
 
         <div class="flex items-center gap-3">
           <div class="bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-2 text-left">
-            <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Current Plan</span>
+            <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">Current Package</span>
             <span class="text-sm font-extrabold text-indigo-700 uppercase font-display" x-text="plan"></span>
           </div>
-          <button @click="logout()" class="border border-slate-200 hover:bg-slate-50 text-slate-550 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm font-display">
+          <button @click="logout()" class="border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm font-display">
             Sign Out
           </button>
         </div>
       </div>
 
-      <!-- Feedback Banner Boxes -->
-      <div x-show="errorMsg" x-cloak class="bg-rose-500/10 border border-rose-500/20 text-rose-600 p-4 rounded-2xl text-sm font-medium">
-        <p x-text="errorMsg"></p>
+      <!-- Feedback Alerts -->
+      <div x-show="errorMsg" x-cloak class="bg-rose-500/10 border border-rose-500/20 text-rose-600 p-4 rounded-2xl text-sm font-semibold flex items-center justify-between">
+        <span x-text="errorMsg"></span>
+        <button @click="errorMsg = ''" class="text-rose-600 font-bold text-lg select-none px-2">&times;</button>
       </div>
-      <div x-show="successMsg" x-cloak class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4 rounded-2xl text-sm font-medium">
-        <p x-text="successMsg"></p>
+      <div x-show="successMsg" x-cloak class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4 rounded-2xl text-sm font-semibold flex items-center justify-between">
+        <span x-text="successMsg"></span>
+        <button @click="successMsg = ''" class="text-emerald-600 font-bold text-lg select-none px-2">&times;</button>
       </div>
 
-      <!-- Two Column Layout: Setup & Socials -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Developer Local Simulation Tools Banner -->
+      <div x-show="isBillingPortalMocked || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'" class="bg-amber-500/10 border border-amber-500/20 rounded-[24px] p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🛠️</span>
+          <h3 class="text-sm font-bold text-amber-800 font-display">Developer Environment Tools (Stripe Mock Mode)</h3>
+        </div>
+        <p class="text-xs text-amber-700 font-medium">
+          Stripe is currently mocked locally. Use these deep-link simulation shortcuts to test plan upgrades and increase slots.
+        </p>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button @click="simulateUpgrade('starter')" :disabled="isUpgradingPlan" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-lg transition shadow-sm">Starter (1 Site)</button>
+          <button @click="simulateUpgrade('pro')" :disabled="isUpgradingPlan" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-lg transition shadow-sm">Pro (3 Sites)</button>
+          <button @click="simulateUpgrade('agency')" :disabled="isUpgradingPlan" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-lg transition shadow-sm">Agency (10 Sites)</button>
+        </div>
+      </div>
+
+      <!-- Overview Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="bg-white border border-slate-200/80 rounded-[28px] p-6 shadow-sm flex items-center justify-between">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Websites</span>
+            <span class="block text-2xl font-extrabold text-slate-900 font-display" x-text="websites.length">0</span>
+          </div>
+          <span class="text-3xl bg-slate-50 border border-slate-100 p-3 rounded-2xl">🌐</span>
+        </div>
         
-        <!-- Left Column: Whitelisted Domains (Dynamic List) -->
-        <div class="lg:col-span-6 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
-          <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
-            <div>
-              <h2 class="text-lg font-bold text-slate-900 font-display">Whitelisted Domains</h2>
-              <p class="text-xs text-slate-400 font-semibold">Verify allowed website origins requesting your feed.</p>
-            </div>
-            <span class="text-xs font-bold text-slate-400 font-mono" x-text="`${domainList.length} of ${maxDomains} used`"></span>
+        <div class="bg-white border border-slate-200/80 rounded-[28px] p-6 shadow-sm flex items-center justify-between">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Connections</span>
+            <span class="block text-2xl font-extrabold text-emerald-600 font-display" x-text="websites.filter(w => w.status === 'connected').length">0</span>
+          </div>
+          <span class="text-3xl bg-emerald-50 border border-emerald-100 p-3 rounded-2xl">⚡</span>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 rounded-[28px] p-6 shadow-sm flex items-center justify-between">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Remaining Slots</span>
+            <span class="block text-2xl font-extrabold text-indigo-600 font-display" x-text="`${websites.length} / ${maxDomains}`">0 / 1</span>
+          </div>
+          <span class="text-3xl bg-indigo-50 border border-indigo-100 p-3 rounded-2xl">📦</span>
+        </div>
+      </div>
+
+      <!-- Table Overview Layer -->
+      <div class="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 font-display">Client Websites</h2>
+            <p class="text-xs text-slate-400 font-semibold">Monitor and configure connected feeds across all target domains.</p>
           </div>
 
-          <!-- Domain Slots list -->
-          <div class="space-y-2">
-            <template x-for="(domain, index) in domainList" :key="index">
-              <div class="flex items-center justify-between bg-slate-50 border border-slate-200/60 rounded-xl p-3 text-sm font-semibold text-slate-800">
-                <span x-text="domain" class="font-mono text-xs"></span>
-                <button @click="removeDomain(index)" class="text-slate-400 hover:text-rose-500 transition-colors text-lg px-2 select-none" aria-label="Remove domain">&times;</button>
-              </div>
-            </template>
-            <template x-if="domainList.length === 0">
-              <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 text-xs font-medium">
-                No whitelisted domains yet. Add one below.
-              </div>
-            </template>
-          </div>
-
-          <!-- Add Domain Input Box -->
-          <div x-show="domainList.length < maxDomains" class="flex gap-2">
-            <input type="text" x-model="newDomainInput" @keydown.enter.prevent="addDomain()" placeholder="e.g. example.co.za" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-950 focus:outline-none focus:border-[#00A3E0] focus:ring-1 focus:ring-[#00A3E0] text-sm font-medium">
-            <button @click="addDomain()" class="bg-slate-900 hover:bg-[#00A3E0] text-white px-5 rounded-xl font-bold text-xs transition shadow-sm font-display shrink-0">Add Slot</button>
-          </div>
-
-          <!-- Save Persist Button -->
-          <button @click="saveDomains()" :disabled="isSavingDomains" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl transition duration-150 shadow-md shadow-indigo-500/10 flex items-center justify-center gap-2">
-            <svg x-show="isSavingDomains" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span x-text="isSavingDomains ? 'Saving whitelist...' : 'Save Whitelisted Domains'"></span>
+          <!-- Add Website Trigger -->
+          <button @click="websites.length >= maxDomains ? redirectToBilling() : showAddModal = true" class="bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-95 text-white font-bold py-2.5 px-5 rounded-xl text-xs transition duration-150 shadow-md shadow-indigo-500/10 flex items-center justify-center gap-1.5 font-display self-start sm:self-auto">
+            <span>+ Add Website</span>
           </button>
         </div>
 
-        <!-- Right Column: Social Connection Status cards -->
-        <div class="lg:col-span-6 space-y-6">
-          
-          <!-- Social Profiles Card -->
-          <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
-            <div class="border-b border-slate-100 pb-4">
-              <h2 class="text-lg font-bold text-slate-900 font-display">Connected Social Feeds</h2>
-              <p class="text-xs text-slate-400 font-semibold">Authorize and cache your active social feeds.</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4">
-              <!-- Instagram Feed Status Card -->
-              <div class="border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-pink-50 border border-pink-100 flex items-center justify-center text-xl">📸</div>
-                  <div>
-                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Instagram Feed</span>
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/70 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th class="px-6 py-4">Domain Origin</th>
+                <th class="px-6 py-4">Social Target</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4">Onboarding link</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
+              <template x-for="(w, idx) in websites" :key="w.id">
+                <tr class="hover:bg-slate-50/50 transition duration-150">
+                  <td class="px-6 py-4.5">
+                    <button @click="openDrawer(w)" class="font-mono text-slate-900 font-bold hover:text-[#00A3E0] text-left">
+                      <span x-text="w.domain"></span>
+                    </button>
+                  </td>
+                  <td class="px-6 py-4.5 font-sans">
+                    <template x-if="w.instagram_name">
+                      <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full font-bold">
+                        <span>📸</span> <span x-text="`@${w.instagram_name}`"></span>
+                      </span>
+                    </template>
+                    <template x-if="w.linkedin_name">
+                      <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full font-bold">
+                        <span>💼</span> <span x-text="w.linkedin_name"></span>
+                      </span>
+                    </template>
+                    <template x-if="!w.instagram_name && !w.linkedin_name">
+                      <a :href="w.social_link || '#'" target="_blank" class="text-slate-400 hover:text-slate-600 underline text-xs font-semibold max-w-[150px] truncate block" x-text="w.social_link ? w.social_link.replace(/^https?:\/\/(www\.)?/, '') : 'Not Connected'"></a>
+                    </template>
+                  </td>
+                  <td class="px-6 py-4.5">
+                    <template x-if="w.status === 'connected'">
+                      <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wide text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Connected
+                      </span>
+                    </template>
+                    <template x-if="w.status !== 'connected'">
+                      <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wide text-amber-600 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full">
+                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> Pending Auth
+                      </span>
+                    </template>
+                  </td>
+                  <td class="px-6 py-4.5">
                     <div class="flex items-center gap-2">
-                      <span class="text-sm font-extrabold text-slate-900" x-text="instagramName || 'Not Linked'"></span>
-                      <span class="w-2 h-2 rounded-full" :class="instagramName ? 'bg-emerald-500' : 'bg-slate-300'"></span>
+                      <input type="text" readonly :value="getOnboardingLink(w.auth_token)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-400 w-32 focus:outline-none">
+                      <button :id="`copy-btn-${w.id}`" @click="copyLink(w.auth_token, `copy-btn-${w.id}`)" class="text-xs text-[#00A3E0] hover:text-indigo-600 font-bold tracking-wide">
+                        Copy Link
+                      </button>
                     </div>
-                  </div>
-                </div>
-                <a :href="instagramAuthUrl" class="bg-slate-900 hover:bg-[#00A3E0] text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-sm font-display text-center block w-full sm:w-auto" x-text="instagramName ? 'Reconnect Instagram' : 'Link Instagram'"></a>
-              </div>
-
-              <!-- LinkedIn Feed Status Card -->
-              <div class="border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-[#0077b5]/10 border border-[#0077b5]/20 flex items-center justify-center text-xl text-[#0077b5]">💼</div>
-                  <div>
-                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">LinkedIn Profile</span>
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm font-extrabold text-slate-900" x-text="linkedinName || 'Not Linked'"></span>
-                      <span class="w-2 h-2 rounded-full" :class="linkedinName ? 'bg-emerald-500' : 'bg-slate-300'"></span>
-                    </div>
-                  </div>
-                </div>
-                <template x-if="plan !== 'starter'">
-                  <a :href="linkedinAuthUrl" class="bg-slate-900 hover:bg-[#00A3E0] text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-sm font-display text-center block w-full sm:w-auto" x-text="linkedinName ? 'Reconnect LinkedIn' : 'Link LinkedIn'"></a>
-                </template>
-                <template x-if="plan === 'starter'">
-                  <div class="text-slate-400 font-semibold text-xs bg-slate-50 border border-slate-100 px-4 py-2 rounded-lg text-center font-sans">
-                    LinkedIn Locked (Starter)
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-
-          <!-- Billing Manage Card -->
-          <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-            <div>
-              <h2 class="text-lg font-bold text-slate-900 font-display">Billing & Subscription</h2>
-              <p class="text-xs text-slate-400 font-semibold">Manage payment cards, invoice receipts, and active plans.</p>
-            </div>
-            
-            <div class="flex items-center justify-between bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4">
-              <div class="space-y-1">
-                <span class="block text-[9px] font-bold text-indigo-500 uppercase tracking-wider">Account Package</span>
-                <span class="text-sm font-extrabold text-slate-900 uppercase font-display" x-text="plan"></span>
-              </div>
-              <button @click="redirectToBilling()" class="bg-slate-900 hover:bg-[#00A3E0] text-white font-bold py-2.5 px-5 rounded-xl text-xs transition shadow-sm font-display shrink-0">
-                Manage Billing Portal
-              </button>
-            </div>
-          </div>
-
+                  </td>
+                  <td class="px-6 py-4.5 text-right">
+                    <button @click="openDrawer(w)" class="text-xs bg-slate-900 hover:bg-[#00A3E0] hover:text-white border border-slate-900 text-white font-bold py-1.5 px-3 rounded-lg transition duration-150 font-display">
+                      Manage
+                    </button>
+                  </td>
+                </tr>
+              </template>
+              <template x-if="websites.length === 0">
+                <tr>
+                  <td colspan="5" class="py-16 text-center text-slate-400 text-xs font-semibold space-y-3">
+                    <div class="text-4xl">📁</div>
+                    <p>No client websites have been added yet.</p>
+                    <button @click="showAddModal = true" class="text-[#00A3E0] underline font-bold">Add your first domain</button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
         </div>
-
       </div>
 
-      <!-- Embed Generator Section -->
-      <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
+      <!-- Stripe Portal Card -->
+      <div class="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h2 class="text-lg font-bold text-slate-900 font-display">Edge Embed Snippet</h2>
-          <p class="text-xs text-slate-400 font-semibold">Copy this lightweight HTML code block and paste it anywhere in your site layout.</p>
+          <h2 class="text-lg font-bold text-slate-900 font-display">Billing & Subscription</h2>
+          <p class="text-xs text-slate-400 font-semibold font-sans">Access receipts, manage cards, and change package plans.</p>
         </div>
-
-        <div class="space-y-4">
-          <!-- Feed selector tab -->
-          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <button @click="embedPlatform = 'instagram'; updateEmbedCode()" :class="embedPlatform === 'instagram' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-400'" class="font-bold text-xs pb-1 uppercase tracking-wider font-sans transition-colors">Instagram Feed</button>
-            <span class="text-slate-200">|</span>
-            <button @click="embedPlatform = 'linkedin'; updateEmbedCode()" :class="embedPlatform === 'linkedin' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-400'" class="font-bold text-xs pb-1 uppercase tracking-wider font-sans transition-colors">LinkedIn Feed</button>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <input type="text" id="embed-snippet-input" readonly :value="embedCode" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs text-[#00A3E0] font-mono focus:outline-none">
-            <button id="copy-embed-btn" @click="copyEmbedCode()" class="bg-[#00A3E0] hover:bg-opacity-90 text-white px-5 py-3.5 rounded-xl text-xs transition font-semibold font-display shrink-0">Copy Snippet</button>
-          </div>
-        </div>
+        <button @click="redirectToBilling()" class="bg-slate-900 hover:bg-[#00A3E0] text-white font-bold py-3 px-6 rounded-xl text-xs transition shadow-sm font-display shrink-0 text-center">
+          Manage Customer Portal
+        </button>
       </div>
 
     </div>
+
+    <!-- Modal: Add Website -->
+    <div x-show="showAddModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-sm" role="dialog" aria-modal="true">
+      <div @click.away="showAddModal = false" class="bg-white border border-slate-200 rounded-[32px] max-w-md w-full p-8 space-y-6 relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
+
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <h3 class="text-lg font-bold text-slate-900 font-display">Add Client Website</h3>
+          <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold select-none">&times;</button>
+        </div>
+
+        <form @submit.prevent="submitAddWebsite()" class="space-y-4 font-sans">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Website Domain</label>
+            <input type="text" x-model="newDomain" required placeholder="e.g. voir-visuals.co.za" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-950 focus:outline-none focus:border-[#00A3E0] focus:ring-1 focus:ring-[#00A3E0] text-sm font-medium">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Instagram/Social Link (Optional)</label>
+            <input type="url" x-model="newSocialLink" placeholder="e.g. https://instagram.com/clientprofile" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-950 focus:outline-none focus:border-[#00A3E0] focus:ring-1 focus:ring-[#00A3E0] text-sm font-medium">
+          </div>
+
+          <p class="text-[11px] text-slate-400 leading-relaxed leading-relaxed pt-1">
+            This domain will be whitelisted automatically. A connection token will be created, allowing you to invite your client to authorize their social stream securely.
+          </p>
+
+          <div class="flex gap-3 pt-2">
+            <button type="button" @click="showAddModal = false" class="w-1/2 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-xl text-xs transition font-display">Cancel</button>
+            <button type="submit" :disabled="isAddingWebsite" class="w-1/2 bg-gradient-to-r from-[#00A3E0] to-indigo-500 text-white font-bold py-3 px-4 rounded-xl text-xs transition duration-150 shadow-md shadow-indigo-500/10 flex items-center justify-center gap-1.5 font-display">
+              <svg x-show="isAddingWebsite" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span x-text="isAddingWebsite ? 'Creating...' : 'Create Website'"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Sliding Drawer: Detailed View -->
+    <div x-show="showDrawer" x-cloak class="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
+      <!-- Backdrop blur overlay -->
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" @click="closeDrawer()"></div>
+
+      <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+        <div class="w-screen max-w-md bg-white border-l border-slate-200 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+          <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#00A3E0] to-indigo-500"></div>
+
+          <!-- Header -->
+          <div class="h-16 px-6 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🌐</span>
+              <h2 class="text-sm font-extrabold text-slate-900 font-display">Website Settings</h2>
+            </div>
+            <button @click="closeDrawer()" class="p-2 text-slate-400 hover:text-slate-600 text-lg font-bold select-none">&times;</button>
+          </div>
+
+          <!-- Content scroll area -->
+          <div class="flex-grow overflow-y-auto p-6 space-y-6 font-sans">
+            <template x-if="selectedWebsite">
+              <div class="space-y-6">
+                <!-- Overview Stats -->
+                <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 space-y-2.5">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-400 uppercase tracking-wider">Origin URL</span>
+                    <span class="font-mono font-bold text-slate-900" x-text="selectedWebsite.domain"></span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-400 uppercase tracking-wider">Feed Status</span>
+                    <template x-if="selectedWebsite.status === 'connected'">
+                      <span class="font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full uppercase tracking-wider text-[9px]">Connected</span>
+                    </template>
+                    <template x-if="selectedWebsite.status !== 'connected'">
+                      <span class="font-extrabold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full uppercase tracking-wider text-[9px]">Pending Auth</span>
+                    </template>
+                  </div>
+
+                  <template x-if="selectedWebsite.instagram_name">
+                    <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200/40">
+                      <span class="font-bold text-slate-400 uppercase tracking-wider">Instagram Feed</span>
+                      <a :href="selectedWebsite.instagram_profile" target="_blank" class="font-bold text-[#00A3E0] hover:underline" x-text="`@${selectedWebsite.instagram_name}`"></a>
+                    </div>
+                  </template>
+                  
+                  <template x-if="selectedWebsite.linkedin_name">
+                    <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200/40">
+                      <span class="font-bold text-slate-400 uppercase tracking-wider">LinkedIn Feed</span>
+                      <a :href="selectedWebsite.linkedin_profile" target="_blank" class="font-bold text-[#00A3E0] hover:underline" x-text="selectedWebsite.linkedin_name"></a>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Onboarding Share Panel -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Onboarding Share Link</label>
+                  <p class="text-[11px] text-slate-400 leading-relaxed pb-1">
+                    Send this invitation link to your client. They will authorize basic feed read scopes securely without giving you their account passwords.
+                  </p>
+                  <div class="flex items-center gap-2">
+                    <textarea readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-400 h-16 focus:outline-none resize-none" x-text="getOnboardingLink(selectedWebsite.auth_token)"></textarea>
+                  </div>
+                  <div class="flex gap-2 pt-1">
+                    <button id="drawer-copy-btn" @click="copyLink(selectedWebsite.auth_token, 'drawer-copy-btn')" class="w-full bg-slate-900 hover:bg-[#00A3E0] text-white py-2 rounded-lg text-xs font-bold transition font-display text-center">
+                      Copy Invitation Link
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Edit website details -->
+                <div class="space-y-4 border-t border-slate-100 pt-5">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Replace & Resend Settings</h3>
+                  <div class="space-y-3">
+                    <div class="space-y-1.5">
+                      <label class="block text-xs font-bold text-slate-500">Domain URL</label>
+                      <input type="text" x-model="drawerDomain" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#00A3E0]">
+                    </div>
+
+                    <div class="space-y-1.5">
+                      <label class="block text-xs font-bold text-slate-500">Target Social link</label>
+                      <input type="url" x-model="drawerSocialLink" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#00A3E0]">
+                    </div>
+
+                    <button @click="saveDrawerWebsite()" :disabled="isSavingDrawer" class="w-full border border-[#00A3E0] hover:bg-[#00A3E0] hover:text-white text-[#00A3E0] font-bold py-2.5 px-4 rounded-xl text-xs transition duration-150 flex items-center justify-center gap-1.5 font-display">
+                      <svg x-show="isSavingDrawer" class="animate-spin h-3.5 w-3.5 text-[#00A3E0] hover:text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span x-text="isSavingDrawer ? 'Saving Changes...' : 'Save & Resend Link'"></span>
+                    </button>
+                    <p class="text-[10px] text-slate-400 leading-relaxed font-sans pt-1">
+                      ⚠️ Updating details will revoke any existing authorization and put the website back to "Pending" status.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Embed guides -->
+                <div class="space-y-4 border-t border-slate-100 pt-5">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Embed Integration Code</h3>
+                  
+                  <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                    <button @click="drawerEmbedPlatform = 'instagram'; updateDrawerEmbedCode()" :class="drawerEmbedPlatform === 'instagram' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-450'" class="font-bold text-[10px] pb-1 uppercase tracking-wider transition-colors">Instagram</button>
+                    <span class="text-slate-200">|</span>
+                    <button @click="drawerEmbedPlatform = 'linkedin'; updateDrawerEmbedCode()" :class="drawerEmbedPlatform === 'linkedin' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-450'" class="font-bold text-[10px] pb-1 uppercase tracking-wider transition-colors">LinkedIn</button>
+                  </div>
+
+                  <div class="space-y-2">
+                    <textarea readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono text-slate-500 h-28 focus:outline-none resize-none" x-text="drawerEmbedCode"></textarea>
+                    <button id="copy-drawer-embed-btn" @click="copyDrawerEmbedSnippet()" class="w-full bg-slate-900 hover:bg-[#00A3E0] text-white py-2 rounded-lg text-xs font-bold transition font-display text-center">
+                      Copy Code snippet
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="border-t border-slate-100 pt-5 pb-8">
+                  <button @click="deleteDrawerWebsite()" :disabled="isDeletingWebsite" class="w-full bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-150 flex items-center justify-center gap-1.5 font-display">
+                    <svg x-show="isDeletingWebsite" class="animate-spin h-3.5 w-3.5 text-rose-600 hover:text-white" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Remove Website</span>
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Drawer Footer -->
+          <div class="h-16 px-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+            <span class="text-xs text-slate-400 font-semibold font-sans">Need Help?</span>
+            <a href="mailto:support@codeways.co" class="text-xs font-bold text-[#00A3E0] hover:underline font-sans">support@codeways.co</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <!-- Component Footer -->
+  <!-- Footer -->
   <shared-footer></shared-footer>
 
 </body>
