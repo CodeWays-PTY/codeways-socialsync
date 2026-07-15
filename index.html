@@ -223,10 +223,22 @@
           }
         },
 
+        token: '',
+        init() {
+          const urlParams = new URLSearchParams(window.location.search);
+          this.token = urlParams.get('token') || '';
+        },
+
         redirectToCheckout(planKey) {
           const plan = this.plans[planKey];
-          const onboardingToken = 'onboard_' + Math.random().toString(36).substring(2, 10);
-          window.location.href = `./success.html?plan=${planKey}&token=${onboardingToken}`;
+          if (this.token) {
+            // Forward dashboard token for upgrading
+            window.location.href = `./success.html?plan=${planKey}&token=${encodeURIComponent(this.token)}&upgrade=true`;
+          } else {
+            // New user registration
+            const onboardingToken = 'onboard_' + Math.random().toString(36).substring(2, 10);
+            window.location.href = `./success.html?plan=${planKey}&token=${onboardingToken}`;
+          }
         }
       }));
     });

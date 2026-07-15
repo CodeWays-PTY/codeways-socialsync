@@ -290,7 +290,7 @@
         // Manage Billing Portal Redirection
         async redirectToBilling() {
           if (this.plan === 'starter') {
-            window.location.href = '/#pricing';
+            window.location.href = `/index.html?token=${encodeURIComponent(this.token)}#pricing`;
             return;
           }
           this.isLoading = true;
@@ -305,7 +305,7 @@
             const data = await res.json();
             if (!res.ok) {
               if (data.error === "No billing profile found for this account." || data.error?.includes("billing profile")) {
-                window.location.href = '/#pricing';
+                window.location.href = `/index.html?token=${encodeURIComponent(this.token)}#pricing`;
                 return;
               }
               throw new Error(data.error || 'Failed to create billing session');
@@ -567,7 +567,7 @@
             <tbody class="divide-y divide-slate-100 text-sm font-medium">
               <template x-for="(w, idx) in websites" :key="w.id">
                 <tr class="hover:bg-slate-50/50 transition duration-150">
-                  <td class="px-6 py-4.5">
+                  <td class="px-6 py-6">
                     <button @click="openDrawer(w)" class="font-mono text-slate-900 font-bold hover:text-[#00A3E0] text-left flex flex-wrap items-center gap-2">
                       <span x-text="w.domain" class="mr-1.5"></span>
                       <template x-if="w.domain === 'localhost'">
@@ -575,7 +575,7 @@
                       </template>
                     </button>
                   </td>
-                  <td class="px-6 py-4.5 font-sans">
+                  <td class="px-6 py-6 font-sans">
                     <template x-if="w.instagram_name">
                       <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full font-bold">
                         <span>📸</span> <span x-text="`@${w.instagram_name}`"></span>
@@ -590,7 +590,7 @@
                       <a :href="w.social_link || '#'" target="_blank" class="text-slate-400 hover:text-slate-600 underline text-xs font-semibold max-w-[150px] truncate block" x-text="w.social_link ? w.social_link.replace(/^https?:\/\/(www\.)?/, '') : 'Not Connected'"></a>
                     </template>
                   </td>
-                  <td class="px-6 py-4.5">
+                  <td class="px-6 py-6">
                     <template x-if="w.status === 'connected'">
                       <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wide text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
                         <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Connected
@@ -602,7 +602,7 @@
                       </span>
                     </template>
                   </td>
-                  <td class="px-6 py-4.5 font-sans">
+                  <td class="px-6 py-6 font-sans">
                     <template x-if="w.social_link">
                       <div class="flex items-center gap-2">
                         <input type="text" readonly :value="getOnboardingLink(w.auth_token)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-400 w-32 focus:outline-none">
@@ -617,7 +617,7 @@
                       </span>
                     </template>
                   </td>
-                  <td class="px-6 py-4.5 text-right">
+                  <td class="px-6 py-6 text-right">
                     <button @click="openDrawer(w)" class="text-xs bg-slate-900 hover:bg-[#00A3E0] hover:text-white border border-slate-900 text-white font-bold py-1.5 px-3 rounded-lg transition duration-150 font-display">
                       Manage
                     </button>

@@ -68,16 +68,54 @@
   <shared-footer></shared-footer>
 
   <script>
-    function startOnboarding() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const plan = urlParams.get('plan') || '';
+    const token = urlParams.get('token') || '';
+    const isUpgrade = urlParams.get('upgrade') === 'true';
+
+    const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'http://127.0.0.1:8787' 
+      : 'https://social-api.codeways.co';
+
+    // If it's an upgrade checkout, call the mock-upgrade endpoint to update database state
+    if (isUpgrade && token && plan) {
+      fetch(`${apiHost}/api/dashboard/mock-upgrade`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token, plan: plan })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Mock upgrade executed successfully:", data);
+      })
+      .catch(err => console.error("Mock upgrade callback error:", err));
+    }
+
+    // Customize UI details if it's an upgrade checkout
+    if (isUpgrade) {
+      const heading = document.querySelector('h1');
+      if (heading) heading.textContent = "Upgrade Successful!";
       
+      const description = document.querySelector('p');
+      if (description) description.textContent = `Your account has been upgraded to the ${plan.toUpperCase()} plan. Click below to return to your dashboard and configure your new websites.`;
+      
+      const button = document.querySelector('button');
+      if (button) button.textContent = "Return to Dashboard & Add Website";
+    }
+
+    function startOnboarding() {
       if (!token) {
-        alert("Onboarding token missing. Please check your email or contact support.");
+        alert("Session token missing. Please log in or contact support.");
         return;
       }
       
-      window.location.href = `./onboarding.html?token=${encodeURIComponent(token)}`;
+      if (isUpgrade) {
+        // Redirect back to dashboard and pass token + payment_success to open Add Website modal
+        window.location.href = `./dashboard.html?token=${encodeURIComponent(token)}&payment_success=true`;
+      } else {
+        // Standard new user onboarding path
+        window.location.href = `./onboarding.html?token=${encodeURIComponent(token)}`;
+      }
     }
   </script>
 
