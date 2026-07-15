@@ -59,12 +59,27 @@
         isLoading: false,
         errorMsg: '',
         successMsg: '',
+        cooldownSeconds: 0,
+        cooldownTimer: null,
 
         init() {
           // If already authenticated, go directly to dashboard
           if (localStorage.getItem('socialsync_session_token')) {
             window.location.href = './dashboard.html';
           }
+        },
+
+        startCooldown(seconds) {
+          if (this.cooldownTimer) clearInterval(this.cooldownTimer);
+          this.cooldownSeconds = seconds;
+          this.cooldownTimer = setInterval(() => {
+            if (this.cooldownSeconds > 0) {
+              this.cooldownSeconds--;
+            } else {
+              clearInterval(this.cooldownTimer);
+              this.cooldownTimer = null;
+            }
+          }, 1000);
         },
 
         async sendCode() {
@@ -88,6 +103,7 @@
 
             this.step = 'otp';
             this.successMsg = data.message || "A 6-digit verification code has been sent to your email inbox.";
+            this.startCooldown(60);
           } catch (err) {
             this.errorMsg = err.message || "An error occurred. Please try again.";
           } finally {
@@ -137,6 +153,11 @@
           this.otp = '';
           this.errorMsg = '';
           this.successMsg = '';
+          if (this.cooldownTimer) {
+            clearInterval(this.cooldownTimer);
+            this.cooldownTimer = null;
+          }
+          this.cooldownSeconds = 0;
         }
       }));
     });
@@ -208,9 +229,14 @@
             <span x-text="isLoading ? 'Verifying PIN...' : 'Verify Code'"></span>
           </button>
           
-          <button type="button" @click="resetFlow()" class="text-xs text-[#00A3E0] hover:underline font-bold py-2">
-            Change Email Address
-          </button>
+          <div class="flex flex-col items-center gap-1.5 mt-2">
+            <button type="button" :disabled="cooldownSeconds > 0 || isLoading" @click="sendCode()" class="text-xs text-[#00A3E0] hover:underline font-bold py-1 disabled:text-slate-400 disabled:no-underline">
+              <span x-text="cooldownSeconds > 0 ? `Resend Code in ${cooldownSeconds}s` : 'Resend Verification Code'"></span>
+            </button>
+            <button type="button" @click="resetFlow()" class="text-xs text-slate-500 hover:text-[#00A3E0] hover:underline font-semibold py-1">
+              Change Email Address
+            </button>
+          </div>
         </div>
       </form>
 
