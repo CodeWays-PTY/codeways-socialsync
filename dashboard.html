@@ -693,7 +693,11 @@
               <span x-text="isAddingWebsite ? 'Creating...' : 'Create Website'"></span>
             </button>
           </div>
-        <    <!-- Sliding Drawer: Detailed View -->
+        </form>
+      </div>
+    </div>
+
+    <!-- Sliding Drawer: Detailed View -->
     <div x-show="showDrawer" x-cloak x-effect="document.body.style.overflow = showDrawer ? 'hidden' : ''" class="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
       <!-- Backdrop blur overlay -->
       <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" @click="closeDrawer()"></div>
