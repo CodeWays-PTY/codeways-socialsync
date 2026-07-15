@@ -566,28 +566,35 @@
             </thead>
             <tbody class="text-sm font-medium">
               <template x-for="(w, idx) in websites" :key="w.id">
-                <tr class="group hover:shadow-md transition duration-150">
+                <tr @click="openDrawer(w)" class="group hover:shadow-md transition duration-150 cursor-pointer">
                   <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-l border-slate-200/80 rounded-l-2xl">
-                    <button @click="openDrawer(w)" class="font-mono text-slate-900 font-bold hover:text-[#00A3E0] text-left flex flex-wrap items-center gap-2">
+                    <div class="font-mono text-slate-900 font-bold group-hover:text-[#00A3E0] text-left flex flex-wrap items-center gap-2">
                       <span x-text="w.domain" class="mr-1.5"></span>
                       <template x-if="w.domain === 'localhost'">
-                        <span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md ml-1">Testing Slot (Free)</span>
+                        <span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md ml-1 select-none">Testing Slot (Free)</span>
                       </template>
-                    </button>
+                    </div>
                   </td>
                   <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-slate-200/80 font-sans">
                     <template x-if="w.instagram_name">
-                      <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full font-bold">
+                      <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-pink-50 border border-pink-100 px-2.5 py-1 rounded-full font-bold" @click.stop>
                         <span>📸</span> <span x-text="`@${w.instagram_name}`"></span>
                       </span>
                     </template>
                     <template x-if="w.linkedin_name">
-                      <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full font-bold">
+                      <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full font-bold" @click.stop>
                         <span>💼</span> <span x-text="w.linkedin_name"></span>
                       </span>
                     </template>
                     <template x-if="!w.instagram_name && !w.linkedin_name">
-                      <a :href="w.social_link || '#'" target="_blank" class="text-slate-400 hover:text-slate-600 underline text-xs font-semibold max-w-[150px] truncate block" x-text="w.social_link ? w.social_link.replace(/^https?:\/\/(www\.)?/, '') : 'Not Connected'"></a>
+                      <div>
+                        <template x-if="w.social_link">
+                          <a :href="w.social_link" target="_blank" @click.stop class="text-slate-400 hover:text-[#00A3E0] underline text-xs font-semibold max-w-[150px] truncate block" x-text="w.social_link.replace(/^https?:\/\/(www\.)?/, '')"></a>
+                        </template>
+                        <template x-if="!w.social_link">
+                          <span class="text-slate-400 text-xs font-semibold">Not Connected</span>
+                        </template>
+                      </div>
                     </template>
                   </td>
                   <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-slate-200/80">
@@ -604,9 +611,9 @@
                   </td>
                   <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-slate-200/80 font-sans">
                     <template x-if="w.social_link">
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-2" @click.stop>
                         <input type="text" readonly :value="getOnboardingLink(w.auth_token)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-400 w-32 focus:outline-none">
-                        <button :id="`copy-btn-${w.id}`" @click="copyLink(w.auth_token, `copy-btn-${w.id}`)" class="text-xs text-[#00A3E0] hover:text-indigo-600 font-bold tracking-wide">
+                        <button :id="`copy-btn-${w.id}`" @click="copyLink(w.auth_token, `copy-btn-${w.id}`)" class="text-xs text-[#00A3E0] hover:text-indigo-650 font-bold tracking-wide">
                           Copy Link
                         </button>
                       </div>
@@ -618,7 +625,7 @@
                     </template>
                   </td>
                   <td class="px-6 py-5 bg-white group-hover:bg-slate-50/50 transition duration-150 border-y border-r border-slate-200/80 rounded-r-2xl text-right">
-                    <button @click="openDrawer(w)" class="text-xs bg-slate-900 hover:bg-[#00A3E0] hover:text-white border border-slate-900 text-white font-bold py-1.5 px-3 rounded-lg transition duration-150 font-display">
+                    <button @click.stop="openDrawer(w)" class="text-xs bg-slate-900 hover:bg-[#00A3E0] hover:text-white border border-slate-900 text-white font-bold py-1.5 px-3 rounded-lg transition duration-150 font-display">
                       Manage
                     </button>
                   </td>
