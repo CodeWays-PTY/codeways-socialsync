@@ -289,6 +289,10 @@
 
         // Manage Billing Portal Redirection
         async redirectToBilling() {
+          if (this.plan === 'starter') {
+            window.location.href = '/#pricing';
+            return;
+          }
           this.isLoading = true;
           this.errorMsg = '';
           try {
@@ -300,6 +304,10 @@
 
             const data = await res.json();
             if (!res.ok) {
+              if (data.error === "No billing profile found for this account." || data.error?.includes("billing profile")) {
+                window.location.href = '/#pricing';
+                return;
+              }
               throw new Error(data.error || 'Failed to create billing session');
             }
 
