@@ -700,112 +700,137 @@
                 
                 <!-- Left Column (6 of 12) -->
                 <div class="md:col-span-6 space-y-5">
-                  <!-- Overview Stats -->
-                  <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 space-y-2.5">
-                    <div class="flex items-center justify-between text-xs">
-                      <span class="font-bold text-slate-400 uppercase tracking-wider">Origin URL</span>
-                      <span class="font-mono font-bold text-slate-900" x-text="selectedWebsite.domain"></span>
+                  
+                  <!-- Section: Info & Status -->
+                  <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 space-y-3.5 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Feed Information</h3>
+                    
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="text-slate-500 font-medium">Origin Domain</span>
+                      <span class="font-mono font-bold text-slate-900 bg-white border border-slate-200/80 px-2.5 py-1 rounded-lg" x-text="selectedWebsite.domain"></span>
                     </div>
 
-                    <div class="flex items-center justify-between text-xs">
-                      <span class="font-bold text-slate-400 uppercase tracking-wider">Feed Status</span>
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="text-slate-500 font-medium">Connection Status</span>
                       <template x-if="selectedWebsite.status === 'connected'">
-                        <span class="font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full uppercase tracking-wider text-[9px]">Connected</span>
+                        <span class="font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                          <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Connected
+                        </span>
                       </template>
                       <template x-if="selectedWebsite.status !== 'connected'">
-                        <span class="font-extrabold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full uppercase tracking-wider text-[9px]">Pending Auth</span>
+                        <span class="font-extrabold text-amber-600 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                          <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> Pending Auth
+                        </span>
                       </template>
                     </div>
 
                     <template x-if="selectedWebsite.instagram_name">
-                      <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200/40">
-                        <span class="font-bold text-slate-400 uppercase tracking-wider">Instagram Feed</span>
-                        <a :href="selectedWebsite.instagram_profile" target="_blank" class="font-bold text-[#00A3E0] hover:underline" x-text="`@${selectedWebsite.instagram_name}`"></a>
+                      <div class="flex items-center justify-between text-sm pt-2.5 border-t border-slate-200/40">
+                        <span class="text-slate-500 font-medium">Connected Instagram</span>
+                        <a :href="selectedWebsite.instagram_profile" target="_blank" class="font-bold text-[#00A3E0] hover:underline flex items-center gap-1 text-xs bg-[#00A3E0]/5 px-2.5 py-1 rounded-lg border border-[#00A3E0]/10" x-text="`@${selectedWebsite.instagram_name}`"></a>
                       </div>
                     </template>
                     
                     <template x-if="selectedWebsite.linkedin_name">
-                      <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200/40">
-                        <span class="font-bold text-slate-400 uppercase tracking-wider">LinkedIn Feed</span>
-                        <a :href="selectedWebsite.linkedin_profile" target="_blank" class="font-bold text-[#00A3E0] hover:underline" x-text="selectedWebsite.linkedin_name"></a>
+                      <div class="flex items-center justify-between text-sm pt-2.5 border-t border-slate-200/40">
+                        <span class="text-slate-500 font-medium">Connected LinkedIn</span>
+                        <a :href="selectedWebsite.linkedin_profile" target="_blank" class="font-bold text-[#00A3E0] hover:underline flex items-center gap-1 text-xs bg-[#00A3E0]/5 px-2.5 py-1 rounded-lg border border-[#00A3E0]/10" x-text="selectedWebsite.linkedin_name"></a>
                       </div>
                     </template>
                   </div>
 
-                  <!-- Onboarding Share Link -->
-                  <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Onboarding Share Link</label>
-                    <p class="text-[10px] text-slate-400 leading-relaxed pb-1">
-                      Send this secure link to your client to authorize their social feed.
-                    </p>
-                    <div class="flex items-center gap-2">
-                      <textarea readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-400 h-14 focus:outline-none resize-none" x-text="getOnboardingLink(selectedWebsite.auth_token)"></textarea>
+                  <!-- Section: Onboarding Link -->
+                  <div class="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-sm">
+                    <div class="space-y-1">
+                      <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🔗</span> Onboarding Share Link
+                      </h3>
+                      <p class="text-[11px] text-slate-400 leading-relaxed">
+                        Copy and share this secure link with your client. They can connect their feed directly without sharing login passwords.
+                      </p>
                     </div>
-                    <div class="flex gap-2">
-                      <button id="drawer-copy-btn" @click="copyLink(selectedWebsite.auth_token, 'drawer-copy-btn')" class="w-full bg-slate-900 hover:bg-[#00A3E0] text-white py-2 rounded-lg text-xs font-bold transition font-display text-center">
+                    <div class="space-y-2">
+                      <textarea readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-505 h-16 focus:outline-none resize-none" x-text="getOnboardingLink(selectedWebsite.auth_token)"></textarea>
+                      <button id="drawer-copy-btn" @click="copyLink(selectedWebsite.auth_token, 'drawer-copy-btn')" class="w-full bg-gradient-to-r from-[#00A3E0] to-indigo-500 hover:opacity-95 text-white py-2.5 rounded-xl text-xs font-bold transition font-display text-center shadow-md shadow-indigo-500/10">
                         Copy Invitation Link
                       </button>
                     </div>
                   </div>
 
-                  <!-- Edit website details -->
-                  <div class="space-y-3 border-t border-slate-100 pt-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Replace & Resend Settings</h3>
+                  <!-- Section: Replace & Resend -->
+                  <div class="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Replace & Resend Settings</h3>
                     
-                    <div class="space-y-1.5">
-                      <label class="block text-[11px] font-bold text-slate-500">Domain URL</label>
-                      <input type="text" x-model="drawerDomain" :disabled="selectedWebsite.domain === 'localhost'" :class="selectedWebsite.domain === 'localhost' ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-50 text-slate-900'" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#00A3E0]">
-                      <template x-if="selectedWebsite.domain === 'localhost'">
-                        <p class="text-[9px] text-amber-600 font-medium">⚠️ The free testing domain cannot be renamed.</p>
-                      </template>
-                    </div>
+                    <div class="space-y-3">
+                      <div class="space-y-1">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Domain URL</label>
+                        <input type="text" x-model="drawerDomain" :disabled="selectedWebsite.domain === 'localhost'" :class="selectedWebsite.domain === 'localhost' ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-205' : 'bg-slate-550 text-slate-900 focus:border-[#00A3E0]'" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none">
+                        <template x-if="selectedWebsite.domain === 'localhost'">
+                          <p class="text-[9px] text-amber-600 font-semibold mt-0.5">⚠️ The free testing domain cannot be renamed.</p>
+                        </template>
+                      </div>
 
-                    <div class="space-y-1.5">
-                      <label class="block text-[11px] font-bold text-slate-500">Target Social link</label>
-                      <input type="url" x-model="drawerSocialLink" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#00A3E0]">
-                    </div>
+                      <div class="space-y-1">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Target Social Link</label>
+                        <input type="url" x-model="drawerSocialLink" placeholder="https://instagram.com/profile" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#00A3E0]">
+                      </div>
 
-                    <button @click="saveDrawerWebsite()" :disabled="isSavingDrawer" class="w-full border border-[#00A3E0] hover:bg-[#00A3E0] hover:text-white text-[#00A3E0] font-bold py-2 px-4 rounded-xl text-xs transition duration-150 flex items-center justify-center gap-1.5 font-display">
-                      <svg x-show="isSavingDrawer" class="animate-spin h-3.5 w-3.5 text-[#00A3E0] hover:text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span x-text="isSavingDrawer ? 'Saving Changes...' : 'Save & Resend Link'"></span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Right Column (6 of 12) -->
-                <div class="md:col-span-6 space-y-5">
-                  <!-- Embed guides -->
-                  <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Embed Integration Code</h3>
-                    
-                    <div class="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                      <button @click="drawerEmbedPlatform = 'instagram'; updateDrawerEmbedCode()" :class="drawerEmbedPlatform === 'instagram' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-450'" class="font-bold text-[10px] pb-1 uppercase tracking-wider transition-colors">Instagram</button>
-                      <span class="text-slate-200">|</span>
-                      <button @click="drawerEmbedPlatform = 'linkedin'; updateDrawerEmbedCode()" :class="drawerEmbedPlatform === 'linkedin' ? 'text-[#00A3E0] border-b-2 border-[#00A3E0]' : 'text-slate-450'" class="font-bold text-[10px] pb-1 uppercase tracking-wider transition-colors">LinkedIn</button>
-                    </div>
-
-                    <div class="space-y-2">
-                      <textarea readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono text-slate-500 h-28 focus:outline-none resize-none" x-text="drawerEmbedCode"></textarea>
-                      <button id="copy-drawer-embed-btn" @click="copyDrawerEmbedSnippet()" class="w-full bg-slate-900 hover:bg-[#00A3E0] text-white py-2 rounded-lg text-xs font-bold transition font-display text-center">
-                        Copy Code snippet
+                      <button @click="saveDrawerWebsite()" :disabled="isSavingDrawer" class="w-full border border-[#00A3E0] hover:bg-[#00A3E0]/5 text-[#00A3E0] font-bold py-2.5 px-4 rounded-xl text-xs transition duration-150 flex items-center justify-center gap-1.5 font-display">
+                        <svg x-show="isSavingDrawer" class="animate-spin h-3.5 w-3.5 text-[#00A3E0]" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-text="isSavingDrawer ? 'Saving Changes...' : 'Save & Resend Link'"></span>
                       </button>
                     </div>
                   </div>
 
-                  <!-- Danger Zone -->
-                  <div class="border-t border-slate-100 pt-4">
+                </div>
+
+                <!-- Right Column (6 of 12) -->
+                <div class="md:col-span-6 space-y-5">
+                  
+                  <!-- Section: Embed Integration Code -->
+                  <div class="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Embed Integration Code</h3>
+                    
+                    <div class="flex items-center gap-2 border-b border-slate-100 pb-1.5">
+                      <button @click="drawerEmbedPlatform = 'instagram'; updateDrawerEmbedCode()" :class="drawerEmbedPlatform === 'instagram' ? 'text-[#00A3E0] border-[#00A3E0]' : 'text-slate-400 border-transparent hover:text-slate-600'" class="font-bold text-[10px] pb-1 uppercase tracking-wider border-b-2 transition-all">Instagram</button>
+                      <span class="text-slate-200">|</span>
+                      <button @click="drawerEmbedPlatform = 'linkedin'; updateDrawerEmbedCode()" :class="drawerEmbedPlatform === 'linkedin' ? 'text-[#00A3E0] border-[#00A3E0]' : 'text-slate-400 border-transparent hover:text-slate-600'" class="font-bold text-[10px] pb-1 uppercase tracking-wider border-b-2 transition-all">LinkedIn</button>
+                    </div>
+
+                    <div class="space-y-2">
+                      <textarea readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-[10px] font-mono text-cyan-400 h-28 focus:outline-none resize-none shadow-inner" x-text="drawerEmbedCode"></textarea>
+                      <button id="copy-drawer-embed-btn" @click="copyDrawerEmbedSnippet()" class="w-full bg-slate-900 hover:bg-[#00A3E0] text-white py-2.5 rounded-xl text-xs font-bold transition font-display text-center">
+                        Copy Code Snippet
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Section: Testing Slot Indicator OR Danger Zone -->
+                  <div class="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider font-display text-rose-600">Danger Zone</h3>
+                    
                     <template x-if="selectedWebsite.domain === 'localhost'">
-                      <div class="bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-2xl text-xs font-medium space-y-1">
-                        <p class="font-bold">🔒 Free Testing Slot</p>
-                        <p class="text-[10px] leading-relaxed">This is your permanent testing domain. It cannot be deleted. Feeds loaded on localhost are restricted to a maximum of 3 posts.</p>
+                      <div class="space-y-3">
+                        <div class="bg-amber-500/10 border border-amber-500/20 text-amber-800 p-3.5 rounded-xl text-xs font-medium space-y-1">
+                          <p class="font-bold">🔒 Testing Slot Details</p>
+                          <p class="text-[10px] leading-relaxed text-amber-700">Feeds loaded on localhost are restricted to a maximum of 3 posts. Deleting this slot will remove it from your dashboard.</p>
+                        </div>
+                        <button @click="deleteDrawerWebsite()" :disabled="isDeletingWebsite" class="w-full bg-rose-50 border border-rose-250 hover:bg-rose-550 hover:text-white text-rose-600 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-150 flex items-center justify-center gap-1.5 font-display shadow-sm">
+                          <svg x-show="isDeletingWebsite" class="animate-spin h-3.5 w-3.5 text-rose-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>Remove Testing Slot</span>
+                        </button>
                       </div>
                     </template>
+                    
                     <template x-if="selectedWebsite.domain !== 'localhost'">
-                      <button @click="deleteDrawerWebsite()" :disabled="isDeletingWebsite" class="w-full bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-150 flex items-center justify-center gap-1.5 font-display">
-                        <svg x-show="isDeletingWebsite" class="animate-spin h-3.5 w-3.5 text-rose-600 hover:text-white" fill="none" viewBox="0 0 24 24">
+                      <button @click="deleteDrawerWebsite()" :disabled="isDeletingWebsite" class="w-full bg-rose-50 border border-rose-200 hover:bg-rose-550 hover:text-white text-rose-650 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-150 flex items-center justify-center gap-1.5 font-display shadow-sm">
+                        <svg x-show="isDeletingWebsite" class="animate-spin h-3.5 w-3.5 text-rose-600" fill="none" viewBox="0 0 24 24">
                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
